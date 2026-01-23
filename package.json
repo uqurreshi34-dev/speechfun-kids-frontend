@@ -18,6 +18,8 @@
     "next-auth": "^5.0.0-beta.25",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-speech-recognition": "^4.0.1",
+    "regenerator-runtime": "^0.14.1",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
@@ -25,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-speech-recognition": "^3.9.6",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",

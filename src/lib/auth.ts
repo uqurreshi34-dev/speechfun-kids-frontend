@@ -2,7 +2,7 @@ import NextAuth, { type NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
-
+// the ! is saying - hey the client id and secret definitely exist - dont worry!
 export const authOptions: NextAuthConfig = {
     providers: [
         GoogleProvider({
