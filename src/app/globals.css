@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+}
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+}
+
+h1.title {
+  font-size: 3.5rem;
+  @apply text-center font-extrabold text-transparent bg-clip-text bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500;
+  text-shadow: 3px 3px 0 #fff, 6px 6px 0 #ffd700;
+}
