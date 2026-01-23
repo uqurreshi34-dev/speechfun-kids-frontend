@@ -22,9 +22,11 @@
         "name": "next"
       }
     ],
+    // ✅ THIS FIXES IT
+    "baseUrl": "src",
     "paths": {
       "@/*": [
-        "./*"
+        "*"
       ]
     }
   },
