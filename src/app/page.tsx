@@ -329,7 +329,7 @@ export default function Home() {
                               {isCompleted && <span className="text-3xl">⭐</span>}
                             </div>
                             <div className="text-gray-700 mb-4 flex items-center justify-between">
-                              <span className="flex-1">{challenge.description}</span>
+                              {/* <span className="flex-1">{challenge.description}</span> */}
                               {challenge.audio && (
                                 <button
                                   onClick={() => playAudio(challenge.audio!)}
