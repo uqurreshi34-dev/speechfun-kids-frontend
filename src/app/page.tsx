@@ -1,5 +1,6 @@
 // app/page.tsx
 "use client";
+
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,25 +9,27 @@ import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import SpeechButton from "@/components/SpeechButton";
 
+// ── Interfaces matching your current backend JSON ────────────────────────────
 interface Letter {
   id: number;
   letter: string;
+}
+
+interface Word {
+  id: number;
+  word: string;
+  audio: string | null;  // relative path like "/media/audios/apple.mp3"
+  difficulty: string;
 }
 
 interface Challenge {
   id: number;
   title: string;
   description: string;
-  letter_id: number;
+  letter_name: string;   // "A", "B", etc.
+  word: Word;            // nested
   difficulty: string;
-  audio?: string | null;
-}
-
-interface Word {
-  id: number;
-  word: string;
-  audio: string | null;
-  difficulty: string;
+  created_at: string;
 }
 
 interface ProgressItem {
@@ -62,7 +65,6 @@ export default function Home() {
 
     const getAuthToken = async () => {
       try {
-        // Try to get existing token or create new one
         const response = await axios.post(
           `${backendUrl}/api/users/get-or-create-token/`,
           {
@@ -82,28 +84,22 @@ export default function Home() {
     getAuthToken();
   }, [session?.user?.email, session?.user?.name]);
 
-  // Load user's progress when auth token is available
+  // Load user's progress
   useEffect(() => {
     if (!authToken || progressLoaded) return;
 
     const loadProgress = async () => {
       try {
-        console.log("Loading user progress with token:", authToken);
         const res = await axios.get(`${backendUrl}/api/challenges/progress/`, {
-          headers: {
-            Authorization: `Token ${authToken}`,
-          }
+          headers: { Authorization: `Token ${authToken}` },
         });
 
-        const completed = new Set<number>(
-          res.data.map((p: ProgressItem) => p.challenge)
-        );
-
+        const completed = new Set<number>(res.data.map((p: ProgressItem) => p.challenge));
         setCompletedChallenges(completed);
         setTotalStars(completed.size);
         setProgressLoaded(true);
       } catch (err) {
-        console.error("Failed to load user progress", err);
+        console.error("Failed to load progress", err);
         setProgressLoaded(true);
       }
     };
@@ -152,84 +148,60 @@ export default function Home() {
 
   const handleSpeechResult = async (isCorrect: boolean, transcript: string, challengeId: number) => {
     if (completedChallenges.has(challengeId)) {
-      if (isCorrect) {
-        alert(`✅ Correct! You said: "${transcript}". (Already completed)`);
-      } else {
-        alert(`❌ Not quite! You said: "${transcript}". Try again!`);
-      }
+      alert(isCorrect ? `✅ Already completed!` : `❌ Try again!`);
       return;
     }
 
     if (isCorrect) {
       const success = await handleEarnStar(challengeId);
       if (success) {
-        alert(`🎉 Perfect! You said: "${transcript}". Star earned! ⭐`);
+        alert(`🎉 Perfect! Star earned! ⭐`);
       }
     } else {
-      alert(`❌ Not quite! You said: "${transcript}". Try again!`);
+      alert(`❌ Not quite! Try again!`);
     }
   };
 
   const handleEarnStar = async (challengeId: number): Promise<boolean> => {
     if (!authToken) {
-      alert("Please wait, authentication is loading...");
+      alert("Auth still loading...");
       return false;
     }
 
     try {
-      console.log("Earning star with token:", authToken);
       await axios.post(
         `${backendUrl}/api/challenges/progress/update/`,
-        {
-          challenge: challengeId,
-          completed: true,
-          score: 100
-        },
-        {
-          headers: {
-            Authorization: `Token ${authToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        { challenge: challengeId, completed: true, score: 100 },
+        { headers: { Authorization: `Token ${authToken}`, "Content-Type": "application/json" } }
       );
 
-      setCompletedChallenges(prev => new Set(prev).add(challengeId));
-      setTotalStars(prev => prev + 1);
+      setCompletedChallenges((prev) => new Set([...prev, challengeId]));
+      setTotalStars((prev) => prev + 1);
       return true;
     } catch (err) {
-      const axiosError = err as AxiosError<{ detail?: string }>;
-      console.error("Failed to update progress", err);
-      console.error("Error response:", axiosError.response?.data);
-      alert(`Error saving progress: ${axiosError.response?.data?.detail || axiosError.message || "Unknown error"}`);
+      console.error("Progress update failed", err);
+      alert("Failed to save star.");
       return false;
     }
   };
 
   const playAudio = (audioPath: string) => {
-    let audioUrl = audioPath;
+    const fullUrl = audioPath.startsWith("http") ? audioPath : `${backendUrl}${audioPath}`;
+    console.log("Playing:", fullUrl);
 
-    if (audioPath.startsWith('/')) {
-      audioUrl = `${backendUrl}${audioPath}`;
-    }
-
-    console.log("Playing audio from:", audioUrl);
-
-    const audio = new Audio(audioUrl);
+    const audio = new Audio(fullUrl);
     audio.play().catch((err) => {
-      console.error("Audio playback failed", err);
-      console.error("Attempted URL:", audioUrl);
-      alert("Sorry, couldn't play the audio!");
+      console.error("Audio error:", err);
+      alert("Couldn't play audio – check URL or permissions.");
     });
   };
 
-  if (status === "loading") {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  }
+  if (status === "loading") return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-6xl">
       <motion.h1
-        className="title mb-10"
+        className="title mb-10 text-center"
         initial={{ opacity: 0, y: -60 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, type: "spring" }}
@@ -239,14 +211,14 @@ export default function Home() {
 
       {session ? (
         <div className="space-y-8">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
               <p className="text-xl font-bold text-purple-700">
                 Hi {session.user?.name || session.user?.username}! Let&apos;s talk! 🗣️
               </p>
               <p className="text-lg text-yellow-600 font-bold mt-1 flex items-center gap-2">
                 <Star size={20} fill="gold" className="text-yellow-500" />
-                Gold Stars: {totalStars}
+                Stars: {totalStars}
               </p>
             </div>
             <button
@@ -258,11 +230,7 @@ export default function Home() {
           </div>
 
           {selectedLetter && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex justify-center"
-            >
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center">
               <div className="inline-flex items-center gap-3 bg-white/90 p-3 rounded-xl shadow-lg border-2 border-purple-300">
                 <label className="text-lg font-bold text-purple-700">Level:</label>
                 <select
@@ -279,7 +247,7 @@ export default function Home() {
           )}
 
           <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-4">
-            {letters.map((letter: Letter) => (
+            {letters.map((letter) => (
               <motion.button
                 key={letter.id}
                 onClick={() => handleLetterClick(letter.id)}
@@ -312,8 +280,8 @@ export default function Home() {
 
                   {challenges.length > 0 ? (
                     <div className="grid gap-6 md:grid-cols-2">
-                      {challenges.map((challenge: Challenge) => {
-                        const targetWord = challenge.title.split(' ').pop() || challenge.title;
+                      {challenges.map((challenge) => {
+                        const targetWord = challenge.word?.word || challenge.title.replace(/^say /i, "").trim();
                         const isCompleted = completedChallenges.has(challenge.id);
 
                         return (
@@ -321,19 +289,19 @@ export default function Home() {
                             key={challenge.id}
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className={`bg-linear-to-br from-blue-50 to-purple-50 p-6 rounded-xl shadow-md border-2 ${isCompleted ? 'border-green-400 bg-green-50' : 'border-purple-200'
+                            className={`bg-linear-to-br from-blue-50 to-purple-50 p-6 rounded-xl shadow-md border-2 ${isCompleted ? "border-green-400 bg-green-50" : "border-purple-200"
                               }`}
                           >
                             <div className="flex justify-between items-start mb-2">
                               <h3 className="text-2xl font-bold text-purple-800">{challenge.title}</h3>
                               {isCompleted && <span className="text-3xl">⭐</span>}
                             </div>
+
                             <div className="text-gray-700 mb-4 flex items-center justify-between">
-                              {/* <span className="flex-1">{challenge.description}</span> */}
-                              {challenge.audio && (
+                              {challenge.word?.audio && (
                                 <button
-                                  onClick={() => playAudio(challenge.audio!)}
-                                  className="ml-3 flex items-center gap-2 bg-blue-400 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow-md transition transform hover:scale-105"
+                                  onClick={() => playAudio(challenge.word.audio!)}
+                                  className="flex items-center gap-2 bg-blue-400 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow-md transition transform hover:scale-105"
                                   title="Listen to example"
                                 >
                                   <Volume2 size={16} />
@@ -341,6 +309,7 @@ export default function Home() {
                                 </button>
                               )}
                             </div>
+
                             <div className="flex gap-4 items-center">
                               <SpeechButton
                                 expectedText={targetWord}
@@ -360,12 +329,8 @@ export default function Home() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-xl text-gray-500">
-                        No {selectedDifficulty} challenges yet for this letter.
-                      </p>
-                      <p className="text-md text-gray-400 mt-2">
-                        Try a different difficulty level! 🎮
-                      </p>
+                      <p className="text-xl text-gray-500">No {selectedDifficulty} challenges yet for this letter.</p>
+                      <p className="text-md text-gray-400 mt-2">Try a different level! 🎮</p>
                     </div>
                   )}
                 </section>
@@ -377,7 +342,7 @@ export default function Home() {
 
                   {words.length > 0 ? (
                     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                      {words.map((word: Word) => (
+                      {words.map((word) => (
                         <motion.div
                           key={word.id}
                           initial={{ scale: 0.9, opacity: 0 }}
@@ -398,12 +363,8 @@ export default function Home() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-xl text-gray-500">
-                        No {selectedDifficulty} words yet for this letter.
-                      </p>
-                      <p className="text-md text-gray-400 mt-2">
-                        Try a different difficulty level! 📖
-                      </p>
+                      <p className="text-xl text-gray-500">No {selectedDifficulty} words yet for this letter.</p>
+                      <p className="text-md text-gray-400 mt-2">Try a different level! 📖</p>
                     </div>
                   )}
                 </section>
