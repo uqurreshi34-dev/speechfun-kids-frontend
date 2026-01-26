@@ -24,7 +24,12 @@ export default function Login() {
         if (result?.ok) {
             router.push("/");
         } else {
-            setError("Wrong username or password. Try again!");
+            // Better error message
+            if (result?.error?.includes("verify")) {
+                setError("Please verify your email before logging in. Check your inbox!");
+            } else {
+                setError("Wrong username or password. Try again!");
+            }
         }
     };
 
