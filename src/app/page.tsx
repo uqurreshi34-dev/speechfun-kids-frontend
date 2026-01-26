@@ -155,10 +155,10 @@ export default function Home() {
     if (isCorrect) {
       const success = await handleEarnStar(challengeId);
       if (success) {
-        alert(`🎉 Perfect! Star earned! ⭐`);
+        alert(`🎉 Perfect! You said "${transcript}". Star earned! ⭐`);
       }
     } else {
-      alert(`❌ Not quite! Try again!`);
+      alert(`❌ Not quite! You said "${transcript}" Try again!`);
     }
   };
 
