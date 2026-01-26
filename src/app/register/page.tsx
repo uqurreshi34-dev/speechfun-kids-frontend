@@ -34,14 +34,15 @@ export default function Register() {
         }
         catch (err) {
             if (axios.isAxiosError(err)) {
-                const detail = err.response?.data?.detail;
-                if (detail?.includes("Failed to send")) {
-                    setError("Failed to send verification email. Try again later.");
-                } else if (detail?.includes("verify")) {
-                    setError("Please verify your email first.");
-                } else {
-                    setError(detail || "Registration failed.");
-                }
+                const detail = err.response?.data?.detail || 'registration failed';
+                setError(detail)
+                // if (detail?.includes("Failed to send")) {
+                //     setError("Failed to send verification email. Try again later.");
+                // } else if (detail?.includes("verify")) {
+                //     setError("Please verify your email first.");
+                // } else {
+                //     setError(detail || "Registration failed.");
+                // }
             } else {
                 setError("Network error. Try again.");
             }
