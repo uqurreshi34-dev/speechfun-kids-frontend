@@ -215,7 +215,7 @@ export default function Home() {
   return (
     <>
       {session && <Navbar totalStars={totalStars} />}
-      {/* // <main className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* <main className="container mx-auto px-4 py-8 max-w-6xl">
       <motion.h1
        className="title mb-10 text-center"
        initial={{ opacity: 0, y: -60 }}
