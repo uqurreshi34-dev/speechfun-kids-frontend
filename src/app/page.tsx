@@ -2,10 +2,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, LogOut, Play, Volume2 } from "lucide-react";
-import axios, { AxiosError } from "axios";
+import { Star, Play, Volume2 } from "lucide-react";
+import axios from "axios";
 import Link from "next/link";
 import SpeechButton from "@/components/SpeechButton";
 import Navbar from "@/components/Navbar";
