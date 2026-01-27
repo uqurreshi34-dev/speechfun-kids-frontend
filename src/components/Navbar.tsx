@@ -71,7 +71,7 @@ export default function Navbar({ totalStars }: NavbarProps) {
                 {/* Mobile View */}
                 <div className="md:hidden">
                     <div className="flex justify-between items-center">
-                        <div className="text-xl font-bold">🎤 SpeechFun</div>
+                        <div className="text-xl font-bold"> SpeechFun Kids 🎤✨</div>
 
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
