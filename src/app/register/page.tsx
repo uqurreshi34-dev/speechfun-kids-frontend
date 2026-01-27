@@ -5,6 +5,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useWarmBackend } from "../hooks/useWarmBackend";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -14,6 +15,9 @@ export default function Register() {
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false)
     const router = useRouter();
+
+
+    useWarmBackend();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

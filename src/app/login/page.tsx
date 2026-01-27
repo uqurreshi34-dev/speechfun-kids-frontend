@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useWarmBackend } from "../hooks/useWarmBackend";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -11,6 +12,8 @@ export default function Login() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false)
     const router = useRouter();
+
+    useWarmBackend();
 
     const handleCredentials = async (e: React.FormEvent) => {
         e.preventDefault();
