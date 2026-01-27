@@ -408,6 +408,6 @@ export default function Home() {
           <p className="mt-6 text-lg">or login with Google for quick start!</p>
         </div>
       )}
-    </main >
+    </>
   );
 }
