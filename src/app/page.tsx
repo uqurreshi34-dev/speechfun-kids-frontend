@@ -8,6 +8,9 @@ import { Star, LogOut, Play, Volume2 } from "lucide-react";
 import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import SpeechButton from "@/components/SpeechButton";
+import Navbar from "@/components/Navbar";
+import confetti from "canvas-confetti";
+
 
 // ── Interfaces matching your current backend JSON ────────────────────────────
 interface Letter {
@@ -146,6 +149,15 @@ export default function Home() {
     }
   };
 
+  // confetti function
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
+
   const handleSpeechResult = async (isCorrect: boolean, transcript: string, challengeId: number) => {
     if (completedChallenges.has(challengeId)) {
       alert(isCorrect ? `✅ Already completed!` : `❌ Try again!`);
@@ -155,6 +167,7 @@ export default function Home() {
     if (isCorrect) {
       const success = await handleEarnStar(challengeId);
       if (success) {
+        fireConfetti();
         alert(`🎉 Perfect! You said "${transcript}". Star earned! ⭐`);
       }
     } else {
@@ -196,18 +209,21 @@ export default function Home() {
     });
   };
 
+
   if (status === "loading") return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-6xl">
+    <>
+      {session && <Navbar totalStars={totalStars} />}
+      {/* // <main className="container mx-auto px-4 py-8 max-w-6xl">
       <motion.h1
-        className="title mb-10 text-center"
-        initial={{ opacity: 0, y: -60 }}
+       className="title mb-10 text-center"
+       initial={{ opacity: 0, y: -60 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, type: "spring" }}
       >
-        SpeechFun Kids! 🎤✨
-      </motion.h1>
+         SpeechFun Kids! 🎤✨
+       </motion.h1> */}
 
       {session ? (
         <div className="space-y-8">
@@ -392,6 +408,6 @@ export default function Home() {
           <p className="mt-6 text-lg">or login with Google for quick start!</p>
         </div>
       )}
-    </main>
+    </main >
   );
 }

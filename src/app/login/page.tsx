@@ -9,11 +9,13 @@ export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false)
     const router = useRouter();
 
     const handleCredentials = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setLoading(true);
 
         const result = await signIn("credentials", {
             redirect: false,
@@ -62,15 +64,24 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="w-full bg-linear-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition"
+                        disabled={loading}
+                        className="w-full bg-linear-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Login
+                        {loading ? (
+                            <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                Logging in...
+                            </>
+                        ) : (
+                            "Login"
+                        )}
                     </button>
                 </form>
 
                 <div className="mt-6">
                     <button
                         onClick={() => signIn("google", { callbackUrl: "/" })}
+                        disabled={loading}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-xl text-xl font-bold transition"
                     >
                         Login with Google

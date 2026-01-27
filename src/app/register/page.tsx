@@ -12,12 +12,14 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(false)
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setSuccess(false);
+        setLoading(true);
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/register/`, {
@@ -120,9 +122,17 @@ export default function Register() {
 
                     <button
                         type="submit"
-                        className="w-full bg-linear-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition"
+                        disabled={loading}
+                        className="w-full bg-linear-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Register Now!
+                        {loading ? (
+                            <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                Creating Account...
+                            </>
+                        ) : (
+                            "Register Now!"
+                        )}
                     </button>
                 </form>
 
