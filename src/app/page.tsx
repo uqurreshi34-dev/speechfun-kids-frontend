@@ -224,190 +224,191 @@ export default function Home() {
       >
          SpeechFun Kids! 🎤✨
        </motion.h1> */}
-
-      {session ? (
-        <div className="space-y-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-              <p className="text-xl font-bold text-purple-700">
-                Hi {session.user?.name || session.user?.username}! Let&apos;s talk! 🗣️
-              </p>
-              <p className="text-lg text-yellow-600 font-bold mt-1 flex items-center gap-2">
-                <Star size={20} fill="gold" className="text-yellow-500" />
-                Stars: {totalStars}
-              </p>
-            </div>
-            {/* <button
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        {session ? (
+          <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div>
+                <p className="text-xl font-bold text-purple-700">
+                  Hi {session.user?.name || session.user?.username}! Let&apos;s talk! 🗣️
+                </p>
+                <p className="text-lg text-yellow-600 font-bold mt-1 flex items-center gap-2">
+                  <Star size={20} fill="gold" className="text-yellow-500" />
+                  Stars: {totalStars}
+                </p>
+              </div>
+              {/* <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="flex items-center gap-2 bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg shadow"
             >
               <LogOut size={20} /> Logout
             </button> */}
-          </div>
+            </div>
 
-          {selectedLetter && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center">
-              <div className="inline-flex items-center gap-3 bg-white/90 p-3 rounded-xl shadow-lg border-2 border-purple-300">
-                <label className="text-lg font-bold text-purple-700">Level:</label>
-                <select
-                  value={selectedDifficulty}
-                  onChange={handleDifficultyChange}
-                  className="p-2 border-2 border-purple-300 rounded-lg text-lg font-semibold bg-white hover:border-purple-500 transition cursor-pointer"
-                >
-                  <option value="easy">🟢 Easy</option>
-                  <option value="medium">🟡 Medium</option>
-                  <option value="hard">🔴 Hard</option>
-                </select>
-              </div>
-            </motion.div>
-          )}
-
-          <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-4">
-            {letters.map((letter) => (
-              <motion.button
-                key={letter.id}
-                onClick={() => handleLetterClick(letter.id)}
-                className={`p-6 text-5xl font-bold rounded-2xl shadow-lg transition-all ${selectedLetter === letter.id
-                  ? "bg-linear-to-br from-pink-400 to-purple-500 scale-110"
-                  : "bg-linear-to-br from-yellow-300 to-orange-400 hover:scale-105"
-                  }`}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {letter.letter}
-              </motion.button>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait">
             {selectedLetter && (
-              <motion.div
-                key={`${selectedLetter}-${selectedDifficulty}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
-              >
-                <section className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
-                  <h2 className="text-3xl font-bold text-center mb-6 text-indigo-700">
-                    🎯 Challenges for Letter {letters.find((l) => l.id === selectedLetter)?.letter}
-                  </h2>
-
-                  {challenges.length > 0 ? (
-                    <div className="grid gap-6 md:grid-cols-2">
-                      {challenges.map((challenge) => {
-                        const targetWord = challenge.word?.word || challenge.title.replace(/^say /i, "").trim();
-                        const isCompleted = completedChallenges.has(challenge.id);
-
-                        return (
-                          <motion.div
-                            key={challenge.id}
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className={`bg-linear-to-br from-blue-50 to-purple-50 p-6 rounded-xl shadow-md border-2 ${isCompleted ? "border-green-400 bg-green-50" : "border-purple-200"
-                              }`}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="text-2xl font-bold text-purple-800">{challenge.title}</h3>
-                              {isCompleted && <span className="text-3xl">⭐</span>}
-                            </div>
-
-                            <div className="text-gray-700 mb-4 flex items-center justify-between">
-                              {challenge.word?.audio && (
-                                <button
-                                  onClick={() => playAudio(challenge.word.audio!)}
-                                  className="flex items-center gap-2 bg-blue-400 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow-md transition transform hover:scale-105"
-                                  title="Listen to example"
-                                >
-                                  <Volume2 size={16} />
-                                  <span className="text-sm font-semibold">Hear It!</span>
-                                </button>
-                              )}
-                            </div>
-
-                            <div className="flex gap-4 items-center">
-                              <SpeechButton
-                                expectedText={targetWord}
-                                onResult={(isCorrect, transcript) =>
-                                  handleSpeechResult(isCorrect, transcript, challenge.id)
-                                }
-                              />
-                              {isCompleted && (
-                                <div className="flex items-center gap-2 text-green-600 font-bold">
-                                  <Star size={20} fill="currentColor" /> Completed!
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-xl text-gray-500">No {selectedDifficulty} challenges yet for this letter.</p>
-                      <p className="text-md text-gray-400 mt-2">Try a different level! 🎮</p>
-                    </div>
-                  )}
-                </section>
-
-                <section className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
-                  <h2 className="text-3xl font-bold text-center mb-6 text-indigo-700">
-                    📚 Words to Practice
-                  </h2>
-
-                  {words.length > 0 ? (
-                    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                      {words.map((word) => (
-                        <motion.div
-                          key={word.id}
-                          initial={{ scale: 0.9, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="bg-linear-to-br from-green-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-blue-200 text-center hover:scale-105 transition"
-                        >
-                          <p className="text-2xl font-bold mb-3 text-blue-800">{word.word}</p>
-                          {word.audio && (
-                            <button
-                              onClick={() => playAudio(word.audio!)}
-                              className="flex items-center gap-2 mx-auto bg-linear-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition"
-                            >
-                              <Play size={20} /> Listen!
-                            </button>
-                          )}
-                        </motion.div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-xl text-gray-500">No {selectedDifficulty} words yet for this letter.</p>
-                      <p className="text-md text-gray-400 mt-2">Try a different level! 📖</p>
-                    </div>
-                  )}
-                </section>
+              <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center">
+                <div className="inline-flex items-center gap-3 bg-white/90 p-3 rounded-xl shadow-lg border-2 border-purple-300">
+                  <label className="text-lg font-bold text-purple-700">Level:</label>
+                  <select
+                    value={selectedDifficulty}
+                    onChange={handleDifficultyChange}
+                    className="p-2 border-2 border-purple-300 rounded-lg text-lg font-semibold bg-white hover:border-purple-500 transition cursor-pointer"
+                  >
+                    <option value="easy">🟢 Easy</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="hard">🔴 Hard</option>
+                  </select>
+                </div>
               </motion.div>
             )}
-          </AnimatePresence>
-        </div>
-      ) : (
-        <div className="text-center mt-16">
-          <p className="text-2xl mb-8 text-purple-700">Ready for fun speech games?</p>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Link
-              href="/login"
-              className="bg-linear-to-r from-green-400 to-teal-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-lg hover:scale-105 transition"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="bg-linear-to-r from-pink-400 to-purple-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-lg hover:scale-105 transition"
-            >
-              Register
-            </Link>
+
+            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-4">
+              {letters.map((letter) => (
+                <motion.button
+                  key={letter.id}
+                  onClick={() => handleLetterClick(letter.id)}
+                  className={`p-6 text-5xl font-bold rounded-2xl shadow-lg transition-all ${selectedLetter === letter.id
+                    ? "bg-linear-to-br from-pink-400 to-purple-500 scale-110"
+                    : "bg-linear-to-br from-yellow-300 to-orange-400 hover:scale-105"
+                    }`}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {letter.letter}
+                </motion.button>
+              ))}
+            </div>
+
+            <AnimatePresence mode="wait">
+              {selectedLetter && (
+                <motion.div
+                  key={`${selectedLetter}-${selectedDifficulty}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8"
+                >
+                  <section className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
+                    <h2 className="text-3xl font-bold text-center mb-6 text-indigo-700">
+                      🎯 Challenges for Letter {letters.find((l) => l.id === selectedLetter)?.letter}
+                    </h2>
+
+                    {challenges.length > 0 ? (
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {challenges.map((challenge) => {
+                          const targetWord = challenge.word?.word || challenge.title.replace(/^say /i, "").trim();
+                          const isCompleted = completedChallenges.has(challenge.id);
+
+                          return (
+                            <motion.div
+                              key={challenge.id}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className={`bg-linear-to-br from-blue-50 to-purple-50 p-6 rounded-xl shadow-md border-2 ${isCompleted ? "border-green-400 bg-green-50" : "border-purple-200"
+                                }`}
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <h3 className="text-2xl font-bold text-purple-800">{challenge.title}</h3>
+                                {isCompleted && <span className="text-3xl">⭐</span>}
+                              </div>
+
+                              <div className="text-gray-700 mb-4 flex items-center justify-between">
+                                {challenge.word?.audio && (
+                                  <button
+                                    onClick={() => playAudio(challenge.word.audio!)}
+                                    className="flex items-center gap-2 bg-blue-400 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow-md transition transform hover:scale-105"
+                                    title="Listen to example"
+                                  >
+                                    <Volume2 size={16} />
+                                    <span className="text-sm font-semibold">Hear It!</span>
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex gap-4 items-center">
+                                <SpeechButton
+                                  expectedText={targetWord}
+                                  onResult={(isCorrect, transcript) =>
+                                    handleSpeechResult(isCorrect, transcript, challenge.id)
+                                  }
+                                />
+                                {isCompleted && (
+                                  <div className="flex items-center gap-2 text-green-600 font-bold">
+                                    <Star size={20} fill="currentColor" /> Completed!
+                                  </div>
+                                )}
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-xl text-gray-500">No {selectedDifficulty} challenges yet for this letter.</p>
+                        <p className="text-md text-gray-400 mt-2">Try a different level! 🎮</p>
+                      </div>
+                    )}
+                  </section>
+
+                  <section className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
+                    <h2 className="text-3xl font-bold text-center mb-6 text-indigo-700">
+                      📚 Words to Practice
+                    </h2>
+
+                    {words.length > 0 ? (
+                      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        {words.map((word) => (
+                          <motion.div
+                            key={word.id}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-linear-to-br from-green-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-blue-200 text-center hover:scale-105 transition"
+                          >
+                            <p className="text-2xl font-bold mb-3 text-blue-800">{word.word}</p>
+                            {word.audio && (
+                              <button
+                                onClick={() => playAudio(word.audio!)}
+                                className="flex items-center gap-2 mx-auto bg-linear-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition"
+                              >
+                                <Play size={20} /> Listen!
+                              </button>
+                            )}
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-xl text-gray-500">No {selectedDifficulty} words yet for this letter.</p>
+                        <p className="text-md text-gray-400 mt-2">Try a different level! 📖</p>
+                      </div>
+                    )}
+                  </section>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <p className="mt-6 text-lg">or login with Google for quick start!</p>
-        </div>
-      )}
+        ) : (
+          <div className="text-center mt-16">
+            <p className="text-2xl mb-8 text-purple-700">Ready for fun speech games?</p>
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
+              <Link
+                href="/login"
+                className="bg-linear-to-r from-green-400 to-teal-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="bg-linear-to-r from-pink-400 to-purple-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+              >
+                Register
+              </Link>
+            </div>
+            <p className="mt-6 text-lg">or login with Google for quick start!</p>
+          </div>
+        )}
+      </main >
     </>
   );
 }
