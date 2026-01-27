@@ -262,13 +262,14 @@ export default function Home() {
               </motion.div>
             )}
 
-            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-4">
+            {/* Letter Grid - Updated for mobile */}
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-3 sm:gap-4">
               {letters.map((letter) => (
                 <motion.button
                   key={letter.id}
                   onClick={() => handleLetterClick(letter.id)}
-                  className={`p-6 text-5xl font-bold rounded-2xl shadow-lg transition-all ${selectedLetter === letter.id
-                    ? "bg-linear-to-br from-pink-400 to-purple-500 scale-110"
+                  className={`p-4 sm:p-6 text-4xl sm:text-5xl font-bold rounded-2xl shadow-lg transition-all ${selectedLetter === letter.id
+                    ? "bg-linear-to-br from-pink-400 to-purple-500 scale-110 text-white"
                     : "bg-linear-to-br from-yellow-300 to-orange-400 hover:scale-105"
                     }`}
                   whileHover={{ scale: 1.08 }}
