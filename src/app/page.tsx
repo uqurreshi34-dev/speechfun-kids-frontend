@@ -279,7 +279,7 @@ export default function Home() {
                 </motion.button>
               ))}
             </div>
-
+            {/* Challenges Section */}
             <AnimatePresence mode="wait">
               {selectedLetter && (
                 <motion.div
@@ -290,13 +290,13 @@ export default function Home() {
                   transition={{ duration: 0.3 }}
                   className="space-y-8"
                 >
-                  <section className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
-                    <h2 className="text-3xl font-bold text-center mb-6 text-indigo-700">
+                  <section className="bg-white/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-indigo-700">
                       🎯 Challenges for Letter {letters.find((l) => l.id === selectedLetter)?.letter}
                     </h2>
 
                     {challenges.length > 0 ? (
-                      <div className="grid gap-6 md:grid-cols-2">
+                      <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                         {challenges.map((challenge) => {
                           const targetWord = challenge.word?.word || challenge.title.replace(/^say /i, "").trim();
                           const isCompleted = completedChallenges.has(challenge.id);
@@ -306,12 +306,12 @@ export default function Home() {
                               key={challenge.id}
                               initial={{ scale: 0.9, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
-                              className={`bg-linear-to-br from-blue-50 to-purple-50 p-6 rounded-xl shadow-md border-2 ${isCompleted ? "border-green-400 bg-green-50" : "border-purple-200"
+                              className={`bg-linear-to-br from-blue-50 to-purple-50 p-4 sm:p-6 rounded-xl shadow-md border-2 ${isCompleted ? "border-green-400 bg-green-50" : "border-purple-200"
                                 }`}
                             >
                               <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-2xl font-bold text-purple-800">{challenge.title}</h3>
-                                {isCompleted && <span className="text-3xl">⭐</span>}
+                                <h3 className="text-xl sm:text-2xl font-bold text-purple-800">{challenge.title}</h3>
+                                {isCompleted && <span className="text-2xl sm:text-3xl">⭐</span>}
                               </div>
 
                               <div className="text-gray-700 mb-4 flex items-center justify-between">
@@ -327,7 +327,7 @@ export default function Home() {
                                 )}
                               </div>
 
-                              <div className="flex gap-4 items-center">
+                              <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
                                 <SpeechButton
                                   expectedText={targetWord}
                                   onResult={(isCorrect, transcript) =>
@@ -335,7 +335,7 @@ export default function Home() {
                                   }
                                 />
                                 {isCompleted && (
-                                  <div className="flex items-center gap-2 text-green-600 font-bold">
+                                  <div className="flex items-center justify-center sm:justify-start gap-2 text-green-600 font-bold">
                                     <Star size={20} fill="currentColor" /> Completed!
                                   </div>
                                 )}
@@ -346,27 +346,28 @@ export default function Home() {
                       </div>
                     ) : (
                       <div className="text-center py-12">
-                        <p className="text-xl text-gray-500">No {selectedDifficulty} challenges yet for this letter.</p>
-                        <p className="text-md text-gray-400 mt-2">Try a different level! 🎮</p>
+                        <p className="text-lg sm:text-xl text-gray-500">No {selectedDifficulty} challenges yet for this letter.</p>
+                        <p className="text-sm sm:text-md text-gray-400 mt-2">Try a different level! 🎮</p>
                       </div>
                     )}
                   </section>
 
-                  <section className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
-                    <h2 className="text-3xl font-bold text-center mb-6 text-indigo-700">
+                  {/* Words Section */}
+                  <section className="bg-white/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-indigo-700">
                       📚 Words to Practice
                     </h2>
 
                     {words.length > 0 ? (
-                      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {words.map((word) => (
                           <motion.div
                             key={word.id}
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="bg-linear-to-br from-green-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-blue-200 text-center hover:scale-105 transition"
+                            className="bg-linear-to-br from-green-50 to-blue-50 p-4 sm:p-6 rounded-xl shadow-md border-2 border-blue-200 text-center hover:scale-105 transition"
                           >
-                            <p className="text-2xl font-bold mb-3 text-blue-800">{word.word}</p>
+                            <p className="text-xl sm:text-2xl font-bold mb-3 text-blue-800">{word.word}</p>
                             {word.audio && (
                               <button
                                 onClick={() => playAudio(word.audio!)}
@@ -380,8 +381,8 @@ export default function Home() {
                       </div>
                     ) : (
                       <div className="text-center py-12">
-                        <p className="text-xl text-gray-500">No {selectedDifficulty} words yet for this letter.</p>
-                        <p className="text-md text-gray-400 mt-2">Try a different level! 📖</p>
+                        <p className="text-lg sm:text-xl text-gray-500">No {selectedDifficulty} words yet for this letter.</p>
+                        <p className="text-sm sm:text-md text-gray-400 mt-2">Try a different level! 📖</p>
                       </div>
                     )}
                   </section>
@@ -390,23 +391,23 @@ export default function Home() {
             </AnimatePresence>
           </div>
         ) : (
-          <div className="text-center mt-16">
-            <p className="text-2xl mb-8 text-purple-700">Ready for fun speech games?</p>
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
+          <div className="text-center mt-16 px-4">
+            <p className="text-xl sm:text-2xl mb-8 text-purple-700">Ready for fun speech games?</p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
               <Link
                 href="/login"
-                className="bg-linear-to-r from-green-400 to-teal-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+                className="bg-linear-to-r from-green-400 to-teal-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="bg-linear-to-r from-pink-400 to-purple-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+                className="bg-linear-to-r from-pink-400 to-purple-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
               >
                 Register
               </Link>
             </div>
-            <p className="mt-6 text-lg">or login with Google for quick start!</p>
+            <p className="mt-6 text-base sm:text-lg">or login with Google for quick start!</p>
           </div>
         )}
       </main >
