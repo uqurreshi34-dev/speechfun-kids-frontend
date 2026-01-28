@@ -90,7 +90,7 @@ export default function Navbar({ totalStars }: NavbarProps) {
                     {/* Mobile Menu */}
                     {mobileMenuOpen && (
                         <div className="
-                        mt-3 mx-2               
+                        mt-3           
                         bg-white/95 backdrop-blur-md  
                         text-purple-900         
                         rounded-2xl shadow-2xl    
