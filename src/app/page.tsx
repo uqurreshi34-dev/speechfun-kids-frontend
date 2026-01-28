@@ -340,7 +340,7 @@ export default function Home() {
                                 {isCompleted && <span className="text-2xl sm:text-3xl">⭐</span>}
                               </div>
 
-                              <div className="text-gray-700 mb-4 flex items-center justify-between">
+                              <div className="mt-4 flex flex-col items-start gap-4">
                                 {challenge.word?.audio && (
                                   <button
                                     onClick={() => playAudio(challenge.word.audio!)}
@@ -362,17 +362,19 @@ export default function Home() {
                                     <span>Hear It!</span>
                                   </button>
                                 )}
-                              </div>
 
-                              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center sm:items-center">
                                 <SpeechButton
                                   expectedText={targetWord}
                                   onResult={(isCorrect, transcript) =>
                                     handleSpeechResult(isCorrect, transcript, challenge.id)
                                   }
                                 />
+                              </div>
+
+                              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center sm:items-center">
+
                                 {isCompleted && (
-                                  <div className="flex items-center justify-center sm:justify-start gap-2 text-green-600 font-bold">
+                                  <div className="flex items-center gap-2 text-green-600 font-bold">
                                     <Star size={20} fill="currentColor" /> Completed!
                                   </div>
                                 )}
