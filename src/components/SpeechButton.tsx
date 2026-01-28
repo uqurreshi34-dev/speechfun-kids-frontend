@@ -132,8 +132,9 @@ export default function SpeechButton({ expectedText, onResult }: SpeechButtonPro
                 shadow-lg
                 hover:scale-105 transition-transform
                 disabled:opacity-50 disabled:cursor-not-allowed
-                min-w-[140px]             
-                w-full sm:w-auto          
+                w-auto                       
+                min-w-[140px]                 
+                sm:min-w-[160px]             
                 ${listening
                     ? "bg-red-500 hover:bg-red-600"
                     : "bg-linear-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
