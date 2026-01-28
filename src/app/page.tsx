@@ -363,17 +363,21 @@ export default function Home() {
                                   </button>
                                 )}
 
-                                <SpeechButton
-                                  expectedText={targetWord}
-                                  onResult={(isCorrect, transcript) =>
-                                    handleSpeechResult(isCorrect, transcript, challenge.id)
-                                  }
-                                />
-                                {isCompleted && (
-                                  <div className="flex items-center gap-2 text-green-600 font-bold">
-                                    <Star size={20} fill="currentColor" /> Completed!
-                                  </div>
-                                )}
+                                <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
+                                  <SpeechButton
+                                    expectedText={targetWord}
+                                    onResult={(isCorrect, transcript) =>
+                                      handleSpeechResult(isCorrect, transcript, challenge.id)
+                                    }
+                                  />
+
+                                  {isCompleted && (
+                                    <div className="flex items-center gap-2 text-green-600 font-bold whitespace-nowrap">
+                                      <Star size={20} fill="currentColor" />
+                                      Completed!
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </motion.div>
                           );
