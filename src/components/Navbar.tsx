@@ -89,40 +89,48 @@ export default function Navbar({ totalStars }: NavbarProps) {
 
                     {/* Mobile Menu */}
                     {mobileMenuOpen && (
-                        <div className="mt-4 space-y-2">
-                            <button
-                                onClick={() => {
-                                    router.push("/");
-                                    setMobileMenuOpen(false);
-                                }}
-                                className={`w-full flex items-center gap-2 px-4 py-3 rounded-lg transition ${pathname === "/"
-                                    ? "bg-white/30 font-bold"
-                                    : "hover:bg-white/20"
-                                    }`}
-                            >
-                                <Home size={20} />
-                                Challenges
-                            </button>
-                            <button
-                                onClick={() => {
-                                    router.push("/dashboard");
-                                    setMobileMenuOpen(false);
-                                }}
-                                className={`w-full flex items-center gap-2 px-4 py-3 rounded-lg transition ${pathname === "/dashboard"
-                                    ? "bg-white/30 font-bold"
-                                    : "hover:bg-white/20"
-                                    }`}
-                            >
-                                <BarChart3 size={20} />
-                                Dashboard
-                            </button>
-                            <button
-                                onClick={() => signOut({ callbackUrl: "/" })}
-                                className="w-full flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-3 rounded-lg transition"
-                            >
-                                <LogOut size={20} />
-                                Logout
-                            </button>
+                        <div className="
+                        mt-3 mx-2               
+                        bg-white/95 backdrop-blur-md  
+                        text-purple-900         
+                        rounded-2xl shadow-2xl    
+                        border border-purple-200/50
+                        overflow-hidden
+                        max-w-md mx-auto          
+                      ">
+                            <div className="py-2">
+                                <button
+                                    onClick={() => {
+                                        router.push("/");
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-5 py-4 text-left transition
+                                        ${pathname === "/" ? "bg-purple-100/70 font-semibold" : "hover:bg-purple-50"}
+                                      `}
+                                >
+                                    <Home size={22} />
+                                    Challenges
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        router.push("/dashboard");
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-5 py-4 text-left transition border-t border-purple-100
+                                        ${pathname === "/dashboard" ? "bg-purple-100/70 font-semibold" : "hover:bg-purple-50"}
+                                      `}
+                                >
+                                    <BarChart3 size={22} />
+                                    Dashboard
+                                </button>
+                                <button
+                                    onClick={() => signOut({ callbackUrl: "/" })}
+                                    className="w-full flex items-center gap-3 px-5 py-4 text-left text-red-600 hover:bg-red-50 transition border-t border-purple-100"
+                                >
+                                    <LogOut size={22} />
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
