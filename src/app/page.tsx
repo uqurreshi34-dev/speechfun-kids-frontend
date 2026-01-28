@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Play, Volume2 } from "lucide-react";
+import { Star, Play, Volume2, HelpCircle } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
 import SpeechButton from "@/components/SpeechButton";
@@ -54,6 +54,10 @@ export default function Home() {
   const [totalStars, setTotalStars] = useState<number>(0);
   const [progressLoaded, setProgressLoaded] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [aiHelperOpen, setAiHelperOpen] = useState(false);
+  const [selectedWord, setSelectedWord] = useState<Word | null>(null);
+  const [aiExplanation, setAiExplanation] = useState("");
+  const [loadingAI, setLoadingAI] = useState(false);
 
   useEffect(() => {
     axios
@@ -207,6 +211,28 @@ export default function Home() {
       console.error("Audio error:", err);
       alert("Couldn't play audio – check URL or permissions.");
     });
+  };
+
+  const getAIHelp = async (word: string) => {
+    setLoadingAI(true);
+    setAiExplanation("");
+
+    try {
+      const response = await axios.post(`${backendUrl}/api/users/ai-help/`, {
+        word: word
+      });
+
+      setAiExplanation(response.data.explanation);
+    } catch (error) {
+      console.error("AI helper error:", error);
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        setAiExplanation(error.response.data.error);
+      } else {
+        setAiExplanation("Oops! I couldn't get help right now. Try again later! 😊");
+      }
+    } finally {
+      setLoadingAI(false);
+    }
   };
 
 
@@ -368,14 +394,29 @@ export default function Home() {
                             className="bg-linear-to-br from-green-50 to-blue-50 p-4 sm:p-6 rounded-xl shadow-md border-2 border-blue-200 text-center hover:scale-105 transition"
                           >
                             <p className="text-xl sm:text-2xl font-bold mb-3 text-blue-800">{word.word}</p>
-                            {word.audio && (
+
+                            <div className="space-y-2">
+                              {word.audio && (
+                                <button
+                                  onClick={() => playAudio(word.audio!)}
+                                  className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition"
+                                >
+                                  <Play size={20} /> Listen!
+                                </button>
+                              )}
+
+                              {/* AI Helper Button */}
                               <button
-                                onClick={() => playAudio(word.audio!)}
-                                className="flex items-center gap-2 mx-auto bg-linear-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition"
+                                onClick={() => {
+                                  setSelectedWord(word);
+                                  setAiHelperOpen(true);
+                                  getAIHelp(word.word);
+                                }}
+                                className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600 text-white px-4 py-2 rounded-lg shadow-md transition"
                               >
-                                <Play size={20} /> Listen!
+                                <HelpCircle size={20} /> Ask AI Helper
                               </button>
-                            )}
+                            </div>
                           </motion.div>
                         ))}
                       </div>
@@ -411,6 +452,58 @@ export default function Home() {
           </div>
         )}
       </main >
+      {/* AI Helper Modal */}
+      {aiHelperOpen && selectedWord && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setAiHelperOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-2xl font-bold text-purple-700 flex items-center gap-2">
+                <span className="text-3xl">🤖</span> AI Helper
+              </h3>
+              <button
+                onClick={() => setAiHelperOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mb-4 p-4 bg-purple-50 rounded-xl">
+              <p className="text-3xl font-bold text-center text-purple-700">
+                {selectedWord.word}
+              </p>
+            </div>
+
+            {loadingAI ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+                <p className="text-gray-600">AI is thinking... 🤔</p>
+              </div>
+            ) : (
+              <div className="bg-linear-to-br from-blue-50 to-purple-50 p-4 rounded-xl">
+                <p className="text-gray-800 whitespace-pre-line leading-relaxed">
+                  {aiExplanation}
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={() => setAiHelperOpen(false)}
+              className="mt-6 w-full bg-linear-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-bold hover:opacity-90 transition"
+            >
+              Got it! Thanks! 👍
+            </button>
+          </motion.div>
+        </div>
+      )}
     </>
   );
 }
