@@ -371,14 +371,11 @@ export default function Home() {
                                 />
                               </div>
 
-                              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center sm:items-center">
-
-                                {isCompleted && (
-                                  <div className="flex items-center gap-2 text-green-600 font-bold">
-                                    <Star size={20} fill="currentColor" /> Completed!
-                                  </div>
-                                )}
-                              </div>
+                              {isCompleted && (
+                                <div className="flex items-center gap-2 text-green-600 font-bold">
+                                  <Star size={20} fill="currentColor" /> Completed!
+                                </div>
+                              )}
                             </motion.div>
                           );
                         })}
