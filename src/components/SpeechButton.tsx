@@ -140,7 +140,7 @@ export default function SpeechButton({ expectedText, onResult }: SpeechButtonPro
         <button
             onClick={startListening}
             disabled={listening}
-            className={`flex items-center justify-center gap-2 bg-linear-to-r px-4 sm:px-6 py-3 rounded-xl w-full sm:w-auto text-white ${listening ? "bg-red-500" : "bg-green-500 hover:bg-green-600"
+            className={`flex items-center justify-center gap-2 bg-linear-to-r from-green-500 to-teal-500 text-white px-4 sm:px-6 py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition disabled:opacity-50 w-full sm:w-auto ${listening ? "bg-red-500" : "bg-green-500 hover:bg-green-600"
                 }`}
         >
             <Mic size={20} />
