@@ -344,11 +344,22 @@ export default function Home() {
                                 {challenge.word?.audio && (
                                   <button
                                     onClick={() => playAudio(challenge.word.audio!)}
-                                    className="flex items-center gap-2 bg-blue-400 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow-md transition transform hover:scale-105"
+                                    className={`
+                                    flex items-center justify-center gap-2
+                                    bg-blue-400 hover:bg-blue-500
+                                    text-white
+                                    px-5 sm:px-6 py-3                   
+                                    rounded-xl                           
+                                    shadow-lg                            
+                                    transition hover:scale-105
+                                    font-bold                           
+                                    min-w-[140px]                       
+                                    w-auto
+                                  `}
                                     title="Listen to example"
                                   >
-                                    <Volume2 size={16} />
-                                    <span className="text-sm font-semibold">Hear It!</span>
+                                    <Volume2 size={20} />
+                                    <span>Hear It!</span>
                                   </button>
                                 )}
                               </div>
