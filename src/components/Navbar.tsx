@@ -4,7 +4,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { Star, LogOut, Home, BarChart3, Menu } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface NavbarProps {
     totalStars: number;
@@ -15,6 +15,25 @@ export default function Navbar({ totalStars }: NavbarProps) {
     const router = useRouter();
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                mobileMenuOpen &&
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node)
+            ) {
+                setMobileMenuOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [mobileMenuOpen]);
 
     if (!session) return null;
 
@@ -89,7 +108,8 @@ export default function Navbar({ totalStars }: NavbarProps) {
 
                     {/* Mobile Menu */}
                     {mobileMenuOpen && (
-                        <div className="
+                        <div ref={menuRef}
+                            className="
                         mt-3           
                         bg-white/95 backdrop-blur-md  
                         text-purple-900         
