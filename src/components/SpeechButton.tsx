@@ -119,29 +119,26 @@ export default function SpeechButton({ expectedText, onResult }: SpeechButtonPro
     if (!SpeechRecognition) {
         return <p className="text-red-500">Speech recognition not supported in this browser.</p>;
     }
-    {/* <button
-  onClick={handleSpeech}
-  disabled={isListening}
-  className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-teal-500 text-white px-4 sm:px-6 py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
->
-  {isListening ? (
-    <>
-      <div className="animate-pulse">🎤</div>
-      Listening...
-    </>
-  ) : (
-    <>
-      <Volume2 size={20} />
-      Say It!
-    </>
-  )}
-</button> */}
+
     return (
         <button
             onClick={startListening}
             disabled={listening}
-            className={`flex items-center justify-center gap-2 bg-linear-to-r from-green-500 to-teal-500 text-white px-4 sm:px-6 py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition disabled:opacity-50 sm:w-auto ${listening ? "bg-red-500" : "bg-green-500 hover:bg-green-600"
-                }`}
+            className={`
+                flex items-center justify-center gap-2 
+                text-white font-bold
+                px-5 sm:px-6 py-3
+                rounded-xl
+                shadow-lg
+                hover:scale-105 transition-transform
+                disabled:opacity-50 disabled:cursor-not-allowed
+                min-w-[140px]             
+                w-full sm:w-auto          
+                ${listening
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-linear-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+                }
+              `}
         >
             <Mic size={20} />
             {listening ? "Listening..." : "Say It!"}
