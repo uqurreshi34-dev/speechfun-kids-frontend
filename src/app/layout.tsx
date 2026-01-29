@@ -2,32 +2,26 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
 import Navbar from "@/components/Navbar";
-import { useSession } from "next-auth/react"; // ← add this if not already
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SpeechFun Kids",
-  description: "Interactive speech therapy for children",
+  title: "SpeechFun Kids – Speech Therapy Fun!",
+  description: "Interactive speech therapy challenges for children",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  // This is a client component now – we can use useSession here
-  const { data: session } = useSession();
-
+export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased bg-gradient-to-b from-blue-50 to-purple-50 min-h-screen`}>
-        <Navbar />
-
-        <main className={`pt-20 md:pt-24 ${!session ? "pt-0 md:pt-0" : ""}`}>
-          {children}
-        </main>
+      <body className={`${inter.className} antialiased bg-linear-to-b from-blue-50 to-purple-50 min-h-screen`}>
+        <Providers>
+          <Navbar />
+          <main>
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );
