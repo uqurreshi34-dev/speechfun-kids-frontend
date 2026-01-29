@@ -62,7 +62,7 @@ export default function Login() {
                 }}
             />
             {/* Background Decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
                 <div className="absolute top-10 left-10 text-6xl animate-bounce">⭐</div>
                 <div className="absolute top-20 right-20 text-5xl animate-bounce" style={{ animationDelay: '0.2s' }}>🌈</div>
                 <div className="absolute bottom-20 left-20 text-6xl animate-bounce" style={{ animationDelay: '0.4s' }}>🎨</div>
