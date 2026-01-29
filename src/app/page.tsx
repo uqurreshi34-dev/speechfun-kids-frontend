@@ -8,11 +8,11 @@ import { Star, Play, Volume2, HelpCircle } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
 import SpeechButton from "@/components/SpeechButton";
-import Navbar from "@/components/Navbar";
 import confetti from "canvas-confetti";
 
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
-// ── Interfaces matching your current backend JSON ────────────────────────────
+// ── Interfaces ────────────────────────────
 interface Letter {
   id: number;
   letter: string;
@@ -21,7 +21,7 @@ interface Letter {
 interface Word {
   id: number;
   word: string;
-  audio: string | null;  // relative path like "/media/audios/apple.mp3"
+  audio: string | null;
   difficulty: string;
 }
 
@@ -29,8 +29,8 @@ interface Challenge {
   id: number;
   title: string;
   description: string;
-  letter_name: string;   // "A", "B", etc.
-  word: Word;            // nested
+  letter_name: string;
+  word: Word;
   difficulty: string;
   created_at: string;
 }
@@ -40,8 +40,6 @@ interface ProgressItem {
   completed: boolean;
   score: number;
 }
-
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -66,7 +64,7 @@ export default function Home() {
       .catch((err) => console.error("Failed to load letters", err));
   }, []);
 
-  // Get or create Django auth token when user logs in
+  // Get or create Django auth token
   useEffect(() => {
     if (!session?.user?.email) return;
 
@@ -153,7 +151,7 @@ export default function Home() {
     }
   };
 
-  // confetti function
+  // Confetti function
   const fireConfetti = () => {
     confetti({
       particleCount: 100,
@@ -202,11 +200,12 @@ export default function Home() {
     }
   };
 
-  const playAudio = (audioPath: string) => {
-    const fullUrl = audioPath.startsWith("http") ? audioPath : `${backendUrl}${audioPath}`;
-    console.log("Playing:", fullUrl);
+  const playAudio = (audioPath: string | null) => {
+    if (!audioPath) return;
+    const url = audioPath.startsWith("http") ? audioPath : `${backendUrl}${audioPath}`;
+    console.log("Playing:", url);
 
-    const audio = new Audio(fullUrl);
+    const audio = new Audio(url);
     audio.play().catch((err) => {
       console.error("Audio error:", err);
       alert("Couldn't play audio – check URL or permissions.");
@@ -235,21 +234,10 @@ export default function Home() {
     }
   };
 
-
   if (status === "loading") return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
   return (
     <>
-      {session && <Navbar totalStars={totalStars} />}
-      {/* <main className="container mx-auto px-4 py-8 max-w-6xl">
-      <motion.h1
-       className="title mb-10 text-center"
-       initial={{ opacity: 0, y: -60 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, type: "spring" }}
-      >
-         SpeechFun Kids! 🎤✨
-       </motion.h1> */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         {session ? (
           <div className="space-y-8">
@@ -263,12 +251,6 @@ export default function Home() {
                   Stars: {totalStars}
                 </p>
               </div>
-              {/* <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="flex items-center gap-2 bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg shadow"
-            >
-              <LogOut size={20} /> Logout
-            </button> */}
             </div>
 
             {selectedLetter && (
@@ -288,15 +270,15 @@ export default function Home() {
               </motion.div>
             )}
 
-            {/* Letter Grid - Updated for mobile */}
+            {/* Letter Grid */}
             <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-3 sm:gap-4">
               {letters.map((letter) => (
                 <motion.button
                   key={letter.id}
                   onClick={() => handleLetterClick(letter.id)}
                   className={`p-4 sm:p-6 text-4xl sm:text-5xl font-bold rounded-2xl shadow-lg transition-all ${selectedLetter === letter.id
-                    ? "bg-linear-to-br from-pink-400 to-purple-500 scale-110 text-white"
-                    : "bg-linear-to-br from-yellow-300 to-orange-400 hover:scale-105"
+                    ? "bg-gradient-to-br from-pink-400 to-purple-500 scale-110 text-white"
+                    : "bg-gradient-to-br from-yellow-300 to-orange-400 hover:scale-105"
                     }`}
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
@@ -305,7 +287,8 @@ export default function Home() {
                 </motion.button>
               ))}
             </div>
-            {/* Challenges Section */}
+
+            {/* Challenges & Words Sections */}
             <AnimatePresence mode="wait">
               {selectedLetter && (
                 <motion.div
@@ -316,6 +299,7 @@ export default function Home() {
                   transition={{ duration: 0.3 }}
                   className="space-y-8"
                 >
+                  {/* Challenges */}
                   <section className="bg-white/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl">
                     <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-indigo-700">
                       🎯 Challenges for Letter {letters.find((l) => l.id === selectedLetter)?.letter}
@@ -332,7 +316,7 @@ export default function Home() {
                               key={challenge.id}
                               initial={{ scale: 0.9, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
-                              className={`bg-linear-to-br from-blue-50 to-purple-50 p-4 sm:p-6 rounded-xl shadow-md border-2 ${isCompleted ? "border-green-400 bg-green-50" : "border-purple-200"
+                              className={`bg-gradient-to-br from-blue-50 to-purple-50 p-4 sm:p-6 rounded-xl shadow-md border-2 ${isCompleted ? "border-green-400 bg-green-50" : "border-purple-200"
                                 }`}
                             >
                               <div className="flex justify-between items-start mb-2">
@@ -343,7 +327,7 @@ export default function Home() {
                               <div className="mt-4 flex flex-col items-start gap-4">
                                 {challenge.word?.audio && (
                                   <button
-                                    onClick={() => playAudio(challenge.word.audio!)}
+                                    onClick={() => playAudio(challenge.word.audio)}
                                     className={`
                                     flex items-center justify-center gap-2
                                     bg-blue-400 hover:bg-blue-500
@@ -404,14 +388,14 @@ export default function Home() {
                             key={word.id}
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="bg-linear-to-br from-green-50 to-blue-50 p-4 sm:p-6 rounded-xl shadow-md border-2 border-blue-200 text-center hover:scale-105 transition"
+                            className="bg-gradient-to-br from-green-50 to-blue-50 p-4 sm:p-6 rounded-xl shadow-md border-2 border-blue-200 text-center hover:scale-105 transition"
                           >
                             <p className="text-xl sm:text-2xl font-bold mb-3 text-blue-800">{word.word}</p>
 
                             <div className="space-y-2">
                               {word.audio && (
                                 <button
-                                  onClick={() => playAudio(word.audio!)}
+                                  onClick={() => playAudio(word.audio)}
                                   className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition"
                                 >
                                   <Play size={20} /> Listen!
@@ -464,8 +448,9 @@ export default function Home() {
             <p className="mt-6 text-base sm:text-lg">or login with Google for quick start!</p>
           </div>
         )}
-      </main >
-      {/* AI Helper Modal - Magical Kid-Friendly Version */}
+      </main>
+
+      {/* AI Helper Modal */}
       {aiHelperOpen && selectedWord && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -481,13 +466,12 @@ export default function Home() {
               boxShadow: '0 0 40px rgba(167, 139, 250, 0.6), 0 0 80px rgba(236, 72, 153, 0.4)'
             }}
           >
-            {/* Floating Stars Decoration */}
+            {/* Floating Stars */}
             <div className="absolute -top-4 -left-4 text-4xl animate-bounce">⭐</div>
             <div className="absolute -top-4 -right-4 text-3xl animate-bounce" style={{ animationDelay: '0.2s' }}>✨</div>
             <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce" style={{ animationDelay: '0.4s' }}>🌟</div>
             <div className="absolute -bottom-4 -right-4 text-4xl animate-bounce" style={{ animationDelay: '0.6s' }}>💫</div>
 
-            {/* Close Button */}
             <button
               onClick={() => setAiHelperOpen(false)}
               className="absolute top-4 right-4 text-purple-600 hover:text-purple-800 text-3xl font-bold bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:scale-110 transition"
@@ -495,7 +479,6 @@ export default function Home() {
               ×
             </button>
 
-            {/* Header */}
             <div className="text-center mb-6">
               <motion.div
                 animate={{ rotate: [0, 10, -10, 10, 0] }}
@@ -510,14 +493,12 @@ export default function Home() {
               <p className="text-purple-600 font-bold">Let me help you learn!</p>
             </div>
 
-            {/* Word Display */}
             <div className="mb-6 p-6 bg-gradient-to-r from-yellow-200 via-pink-200 to-purple-200 rounded-2xl border-4 border-white shadow-lg">
               <p className="text-4xl font-black text-center text-purple-700">
                 {selectedWord.word} 🎯
               </p>
             </div>
 
-            {/* AI Explanation */}
             {loadingAI ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <motion.div
@@ -537,7 +518,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* Action Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

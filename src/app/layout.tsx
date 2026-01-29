@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +17,10 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
     <html lang="en">
       <body className={`${inter.className} antialiased bg-linear-to-b from-blue-50 to-purple-50 min-h-screen`}>
         <Providers>
-          {children}
+          <Navbar />
+          <main className="pt-20 md:pt-24"> {/* Padding for sticky navbar */}
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

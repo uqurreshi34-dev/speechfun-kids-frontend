@@ -3,51 +3,105 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
-import { Star, LogOut, Home, BarChart3, Menu } from "lucide-react";
+import {
+    Star, LogOut, Home, BarChart3, Menu,
+    CheckSquare, MessageSquare, HelpCircle,
+    Image, BookOpen, Volume2, XCircle
+} from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 
-interface NavbarProps {
-    totalStars: number;
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
+// Type for progress items (fixes "any" error)
+interface ProgressItem {
+    challenge: number;
+    completed: boolean;
+    score: number;
 }
 
-export default function Navbar({ totalStars }: NavbarProps) {
+export default function Navbar() {
     const { data: session } = useSession();
     const router = useRouter();
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [authToken, setAuthToken] = useState<string | null>(null);
+    const [stars, setStars] = useState(0);
+    const [loadingStars, setLoadingStars] = useState(false);
 
     const menuRef = useRef<HTMLDivElement>(null);
 
+
+
+    // Get auth token when session changes
+    useEffect(() => {
+        if (!session?.user?.email) return;
+
+        const getAuthToken = async () => {
+            try {
+                const res = await axios.post(
+                    `${backendUrl}/api/users/get-or-create-token/`,
+                    {
+                        email: session.user.email,
+                        username: session.user.name || session.user.email,
+                    }
+                );
+                setAuthToken(res.data.token);
+            } catch (err) {
+                console.error("Failed to get token", err);
+            }
+        };
+
+        getAuthToken();
+    }, [session]);
+
+    // Load stars when authToken is ready
+    useEffect(() => {
+        if (!authToken) return;
+
+        const loadStars = async () => {
+            setLoadingStars(true);
+            try {
+                const res = await axios.get(`${backendUrl}/api/challenges/progress/`, {
+                    headers: { Authorization: `Token ${authToken}` },
+                });
+                // Type res.data as ProgressItem[]
+                const completed = (res.data as ProgressItem[]).filter(p => p.completed).length;
+                setStars(completed);
+            } catch (err) {
+                console.error("Failed to load stars", err);
+            } finally {
+                setLoadingStars(false);
+            }
+        };
+
+        loadStars();
+    }, [authToken]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (
-                mobileMenuOpen &&
-                menuRef.current &&
-                !menuRef.current.contains(event.target as Node)
-            ) {
+            if (mobileMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setMobileMenuOpen(false);
             }
         };
 
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [mobileMenuOpen]);
 
-    // If no session → show minimal navbar (or nothing - your choice)
+    // Hide navbar on login/register pages
+    if (pathname === "/login" || pathname === "/register") {
+        return null;
+    }
+
+    // Minimal navbar for not logged in
     if (!session) {
         return (
             <nav className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
                 <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                    <div className="text-2xl font-bold">
-                        SpeechFun Kids 🎤✨
-                    </div>
+                    <div className="text-2xl font-bold">SpeechFun Kids 🎤✨</div>
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => router.push("/login")}
-                            className="hover:underline"
-                        >
+                        <button onClick={() => router.push("/login")} className="hover:underline">
                             Login
                         </button>
                         <button
@@ -62,17 +116,17 @@ export default function Navbar({ totalStars }: NavbarProps) {
         );
     }
 
-    // Logged-in navbar - all tabs visible
+    // Full navbar for logged-in users
     const tabs = [
         { name: "Challenges", path: "/", icon: Home },
         { name: "Dashboard", path: "/dashboard", icon: BarChart3 },
-        { name: "Yes/No Lab", path: "/yes-no" },
-        { name: "Functional Language", path: "/functional-language-builder" },
-        { name: "WH Explorer", path: "/wh-explorer" },
-        { name: "Chatter Pics", path: "/chatter-pics" },
-        { name: "Story Builder", path: "/story-builder" },
-        { name: "Sound it Out", path: "/sound-it-out" },
-        { name: "What Does Not Belong", path: "/what-not-belong" },
+        { name: "Yes/No Lab", path: "/yes-no", icon: CheckSquare },
+        { name: "Functional Language", path: "/functional", icon: MessageSquare },
+        { name: "WH Explorer", path: "/wh-explorer", icon: HelpCircle },
+        { name: "Chatter Pics", path: "/chatter-pics", icon: Image },
+        { name: "Story Builder", path: "/story-builder", icon: BookOpen },
+        { name: "Sound it Out", path: "/sound-it-out", icon: Volume2 },
+        { name: "What Does Not Belong", path: "/what-not-belong", icon: XCircle },
     ];
 
     return (
@@ -80,7 +134,7 @@ export default function Navbar({ totalStars }: NavbarProps) {
             <div className="container mx-auto px-4 py-4">
                 {/* Desktop */}
                 <div className="hidden md:flex justify-between items-center">
-                    <div className="text-2xl font-bold">
+                    <div className="text-2xl font-bold flex items-center gap-2">
                         SpeechFun Kids 🎤✨
                     </div>
 
@@ -89,10 +143,10 @@ export default function Navbar({ totalStars }: NavbarProps) {
                             <button
                                 key={tab.path}
                                 onClick={() => router.push(tab.path)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${pathname === tab.path ? "bg-white/30 font-bold" : "hover:bg-white/20"
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition whitespace-nowrap ${pathname === tab.path ? "bg-white/30 font-bold" : "hover:bg-white/20"
                                     }`}
                             >
-                                {tab.icon && <tab.icon size={20} />}
+                                <tab.icon size={20} />
                                 {tab.name}
                             </button>
                         ))}
@@ -100,8 +154,14 @@ export default function Navbar({ totalStars }: NavbarProps) {
 
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
-                            <Star size={20} fill="gold" className="text-yellow-300" />
-                            <span className="font-bold">{totalStars}</span>
+                            {loadingStars ? (
+                                <span className="text-sm">...</span>
+                            ) : (
+                                <>
+                                    <Star size={20} fill="gold" className="text-yellow-300" />
+                                    <span className="font-bold">{stars}</span>
+                                </>
+                            )}
                         </div>
                         <button
                             onClick={() => signOut({ callbackUrl: "/" })}
@@ -121,7 +181,7 @@ export default function Navbar({ totalStars }: NavbarProps) {
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
                                 <Star size={16} fill="gold" className="text-yellow-300" />
-                                <span className="font-bold text-sm">{totalStars}</span>
+                                <span className="font-bold text-sm">{stars}</span>
                             </div>
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -148,7 +208,7 @@ export default function Navbar({ totalStars }: NavbarProps) {
                                         className={`w-full flex items-center gap-3 px-5 py-4 text-left transition border-b border-purple-100 ${pathname === tab.path ? "bg-purple-100/70 font-semibold" : "hover:bg-purple-50"
                                             }`}
                                     >
-                                        {tab.icon && <tab.icon size={22} />}
+                                        <tab.icon size={22} />
                                         {tab.name}
                                     </button>
                                 ))}
