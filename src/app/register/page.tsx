@@ -42,13 +42,6 @@ export default function Register() {
             if (axios.isAxiosError(err)) {
                 const detail = err.response?.data?.detail || 'registration failed';
                 setError(detail)
-                // if (detail?.includes("Failed to send")) {
-                //     setError("Failed to send verification email. Try again later.");
-                // } else if (detail?.includes("verify")) {
-                //     setError("Please verify your email first.");
-                // } else {
-                //     setError(detail || "Registration failed.");
-                // }
             } else {
                 setError("Network error. Try again.");
             }
@@ -57,27 +50,41 @@ export default function Register() {
 
     if (success) {
         return (
-            <main className="min-h-screen flex items-center justify-center px-4">
+            <main
+                className="min-h-screen flex items-center justify-center px-4"
+                style={{
+                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                }}
+            >
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="bg-white/90 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-md border border-green-200 text-center"
+                    className="bg-white/95 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-md border-4 border-white text-center"
+                    style={{
+                        boxShadow: '0 0 40px rgba(245, 87, 108, 0.5)'
+                    }}
                 >
-                    <div className="text-6xl mb-4">📧</div>
-                    <h1 className="text-3xl font-bold mb-4 text-green-600">
+                    <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="text-8xl mb-4"
+                    >
+                        📧
+                    </motion.div>
+                    <h1 className="text-4xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
                         Check Your Email!
                     </h1>
-                    <p className="text-gray-700 mb-6">
-                        We sent a verification link to <strong>{email}</strong>
+                    <p className="text-gray-700 mb-6 text-lg font-medium">
+                        We sent a verification link to <strong className="text-purple-600">{email}</strong>
                     </p>
-                    <p className="text-gray-600 text-sm mb-8">
-                        Click the link in the email to activate your account. Then you can login!
+                    <p className="text-gray-600 text-base mb-8 font-medium">
+                        Click the link in the email to activate your account. Then you can login! ✨
                     </p>
                     <button
                         onClick={() => router.push("/login")}
-                        className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition"
+                        className="w-full bg-gradient-to-r from-green-400 to-teal-500 text-white py-4 rounded-xl text-xl font-black hover:opacity-90 transition shadow-lg"
                     >
-                        Go to Login
+                        Go to Login 🚀
                     </button>
                 </motion.div>
             </main>
@@ -85,11 +92,42 @@ export default function Register() {
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center px-4">
-            <div className="bg-white/90 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-md border border-purple-200">
-                <h1 className="text-4xl font-bold text-center mb-8 text-purple-600">
-                    Join SpeechFun Kids! 🌈
-                </h1>
+        <main
+            className="min-h-screen flex items-center justify-center px-4 relative"
+            style={{
+                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #ffd876 100%)',
+            }}
+        >
+            {/* Background Decoration */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-10 left-10 text-6xl animate-bounce">🎨</div>
+                <div className="absolute top-20 right-20 text-5xl animate-bounce" style={{ animationDelay: '0.2s' }}>🌟</div>
+                <div className="absolute bottom-20 left-20 text-6xl animate-bounce" style={{ animationDelay: '0.4s' }}>🎪</div>
+                <div className="absolute bottom-10 right-10 text-5xl animate-bounce" style={{ animationDelay: '0.6s' }}>🎈</div>
+            </div>
+
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white/95 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-md border-4 border-white relative z-10"
+                style={{
+                    boxShadow: '0 0 40px rgba(245, 87, 108, 0.5)'
+                }}
+            >
+                <div className="text-center mb-8">
+                    <motion.div
+                        animate={{ rotate: [0, -10, 10, 0] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="text-6xl mb-4"
+                    >
+                        🌈
+                    </motion.div>
+                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-orange-600">
+                        Join SpeechFun!
+                    </h1>
+                    <p className="text-pink-600 font-bold mt-2">Let&apos;s learn together! 🎉</p>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <input
@@ -97,37 +135,44 @@ export default function Register() {
                         placeholder="Choose a username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 text-lg"
+                        className="w-full p-4 rounded-xl border-2 border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-medium"
                         required
+                        disabled={loading}
                     />
                     <input
                         type="email"
                         placeholder="Your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 text-lg"
+                        className="w-full p-4 rounded-xl border-2 border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-medium"
                         required
+                        disabled={loading}
                     />
                     <input
                         type="password"
                         placeholder="Create a password (min 8 characters)"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 text-lg"
+                        className="w-full p-4 rounded-xl border-2 border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-medium"
                         required
                         minLength={8}
+                        disabled={loading}
                     />
 
                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-center">
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            className="bg-red-50 border-2 border-red-300 text-red-600 p-4 rounded-xl text-center font-bold"
+                        >
                             {error}
-                        </div>
+                        </motion.div>
                     )}
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl text-xl font-black hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
                     >
                         {loading ? (
                             <>
@@ -135,18 +180,20 @@ export default function Register() {
                                 Creating Account...
                             </>
                         ) : (
-                            "Register Now!"
+                            <>
+                                Register Now! 🎊
+                            </>
                         )}
                     </button>
                 </form>
 
-                <p className="text-center mt-6 text-gray-700">
+                <p className="text-center mt-6 text-gray-700 font-medium">
                     Already have an account?{" "}
-                    <a href="/login" className="text-blue-600 font-medium hover:underline">
-                        Login here
+                    <a href="/login" className="text-pink-600 font-bold hover:underline">
+                        Login here! 👋
                     </a>
                 </p>
-            </div>
+            </motion.div>
         </main>
     );
 }

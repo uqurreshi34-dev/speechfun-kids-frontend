@@ -5,6 +5,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useWarmBackend } from "../hooks/useWarmBackend";
+import { motion } from "framer-motion";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -39,11 +40,53 @@ export default function Login() {
     };
 
     return (
-        <main className="min-h-screen flex items-center justify-center px-4">
-            <div className="bg-white/90 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-md border border-green-200">
-                <h1>
-                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Welcome Back! </span> <span className="text-4xl">🎉</span>
-                </h1>
+        <main
+            className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+            style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            }}
+        >
+            {/* Background Decoration */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-10 left-10 text-6xl animate-bounce">⭐</div>
+                <div className="absolute top-20 right-20 text-5xl animate-bounce" style={{ animationDelay: '0.2s' }}>🌈</div>
+                <div className="absolute bottom-20 left-20 text-6xl animate-bounce" style={{ animationDelay: '0.4s' }}>🎨</div>
+                <div className="absolute bottom-10 right-10 text-5xl animate-bounce" style={{ animationDelay: '0.6s' }}>✨</div>
+            </div>
+
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="
+              bg-white/95 backdrop-blur-lg 
+              p-8 sm:p-10 
+              rounded-3xl 
+              shadow-2xl 
+              w-full max-w-md 
+              border-4 border-white/50 
+              relative z-10
+            "
+                style={{
+                    boxShadow: '0 0 40px rgba(167, 139, 250, 0.5)',
+                }}
+            >
+                <div className="text-center mb-8">
+                    <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                        className="text-6xl mb-4"
+                    >
+                        🎤
+                    </motion.div>
+                    <h1> <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                        Welcome Back! </span>
+                        <span className="text-4xl">🎉</span>
+                    </h1>
+                    <p className="text-purple-700 font-bold mt-2 text-lg">
+                        Let&apos;s practice speaking! 🗣️
+                    </p>
+                </div>
 
                 <form onSubmit={handleCredentials} className="space-y-6">
                     <input
@@ -51,32 +94,72 @@ export default function Login() {
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 text-lg"
+                        className="
+                  w-full p-4 rounded-xl 
+                  border-2 border-purple-300 
+                  focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-400/50 
+                  text-lg font-medium 
+                  bg-white/80 
+                  transition-all duration-200
+                  disabled:opacity-60 disabled:cursor-not-allowed
+                "
                         required
+                        disabled={loading}
                     />
                     <input
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 text-lg"
+                        className="
+                  w-full p-4 rounded-xl 
+                  border-2 border-purple-300 
+                  focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-400/50 
+                  text-lg font-medium 
+                  bg-white/80 
+                  transition-all duration-200
+                  disabled:opacity-60 disabled:cursor-not-allowed
+                "
                         required
+                        disabled={loading}
                     />
 
-                    {error && <p className="text-red-600 text-center font-medium">{error}</p>}
+                    {error && (
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="
+                    bg-red-50 border-2 border-red-300 
+                    text-red-700 p-4 rounded-xl 
+                    text-center font-semibold
+                  "
+                        >
+                            {error}
+                        </motion.div>
+                    )}
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="
+                  w-full 
+                  bg-gradient-to-r from-green-400 to-teal-500 
+                  hover:from-green-500 hover:to-teal-600 
+                  text-white py-4 rounded-xl 
+                  text-xl font-black 
+                  transition-all duration-200 
+                  disabled:opacity-60 disabled:cursor-not-allowed 
+                  shadow-lg hover:shadow-xl 
+                  flex items-center justify-center gap-3
+                "
                     >
                         {loading ? (
                             <>
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-b-transparent"></div>
                                 Logging in...
                             </>
                         ) : (
-                            "Login"
+                            <>Login 🚀</>
                         )}
                     </button>
                 </form>
@@ -85,9 +168,18 @@ export default function Login() {
                     <button
                         onClick={() => signIn("google", { callbackUrl: "/" })}
                         disabled={loading}
-                        className="w-full bg-white hover:bg-gray-50 border-2 border-gray-300 text-gray-700 py-4 rounded-xl text-lg font-bold transition disabled:opacity-50 flex items-center justify-center gap-3 shadow-md"
+                        className="
+                  w-full 
+                  bg-white hover:bg-gray-50 
+                  border-2 border-gray-300 
+                  text-gray-800 py-4 rounded-xl 
+                  text-lg font-bold 
+                  transition-all duration-200 
+                  disabled:opacity-60 
+                  flex items-center justify-center gap-3 
+                  shadow-md hover:shadow-lg
+                "
                     >
-                        {/* Google Logo SVG */}
                         <svg className="w-6 h-6" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -98,13 +190,16 @@ export default function Login() {
                     </button>
                 </div>
 
-                <p className="text-center mt-6 text-gray-700">
-                    New here?{" "}
-                    <a href="/register" className="text-purple-600 font-medium hover:underline">
-                        Register now
+                <p className="text-center mt-8 text-gray-700 font-medium">
+                    New here?{' '}
+                    <a
+                        href="/register"
+                        className="text-purple-700 font-bold hover:text-purple-800 hover:underline transition-colors"
+                    >
+                        Join the fun! 🎉
                     </a>
                 </p>
-            </div>
+            </motion.div>
         </main>
     );
 }
