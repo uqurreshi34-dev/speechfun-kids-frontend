@@ -41,7 +41,7 @@ export default function Login() {
 
     return (
         <main
-            className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+            className="min-h-screen flex items-center justify-center px-4 py-8 relative"  // ← Added py-8
             style={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
             }}
@@ -58,34 +58,23 @@ export default function Login() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="
-              bg-white/95 backdrop-blur-lg 
-              p-8 sm:p-10 
-              rounded-3xl 
-              shadow-2xl 
-              w-full max-w-md 
-              border-4 border-white/50 
-              relative z-10
-            "
+                className="bg-white/95 backdrop-blur-lg p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border-4 border-white relative z-10 my-auto"
                 style={{
-                    boxShadow: '0 0 40px rgba(167, 139, 250, 0.5)',
+                    boxShadow: '0 0 40px rgba(167, 139, 250, 0.5)'
                 }}
             >
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                     <motion.div
                         animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-                        className="text-6xl mb-4"
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="text-5xl sm:text-6xl mb-3"
                     >
                         🎤
                     </motion.div>
-                    <h1> <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
-                        Welcome Back! </span>
-                        <span className="text-4xl">🎉</span>
+                    <h1 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 whitespace-nowrap">
+                        Welcome Back!
                     </h1>
-                    <p className="text-purple-700 font-bold mt-2 text-lg">
-                        Let&apos;s practice speaking! 🗣️
-                    </p>
+                    <p className="text-purple-600 font-bold mt-2 text-sm sm:text-base">Let&apos;s practice speaking! 🗣️</p>  {/* ← Made responsive */}
                 </div>
 
                 <form onSubmit={handleCredentials} className="space-y-6">
