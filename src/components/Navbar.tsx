@@ -89,6 +89,11 @@ export default function Navbar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [mobileMenuOpen]);
 
+    // Minimal navbar for not logged in
+    if (!session) {
+        return
+    }
+
     // Full navbar for logged-in users
     const tabs = [
         { name: "Challenges", path: "/", icon: Home },
