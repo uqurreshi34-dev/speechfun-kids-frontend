@@ -122,7 +122,7 @@ export default function Register() {
             <div
                 className="absolute inset-0 z-5"
                 style={{
-                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.85) 0%, rgba(118, 75, 162, 0.85) 50%, rgba(240, 147, 251, 0.85) 100%)',
+                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.55) 0%, rgba(118, 75, 162, 0.55) 50%, rgba(240, 147, 251, 0.55) 100%)',
                 }}
             />
             {/* Background Decoration */}
