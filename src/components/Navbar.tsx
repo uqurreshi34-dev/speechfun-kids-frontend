@@ -95,13 +95,20 @@ export default function Navbar() {
             <nav className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
                 <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                     <div className="text-2xl font-bold">SpeechFun Kids 🎤✨</div>
+
                     <div className="flex items-center gap-4">
-                        <button onClick={() => router.push("/login")} className="hover:underline">
+                        {/* Login Button – Pastel Blue */}
+                        <button
+                            onClick={() => router.push("/login")}
+                            className="bg-gradient-to-r from-cyan-300 to-sky-300 hover:from-cyan-400 hover:to-sky-400 text-purple-900 font-bold px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition transform hover:scale-105 text-base"
+                        >
                             Login
                         </button>
+
+                        {/* Register Button – Pastel Pink */}
                         <button
                             onClick={() => router.push("/register")}
-                            className="bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+                            className="bg-gradient-to-r from-pink-300 to-rose-300 hover:from-pink-400 hover:to-rose-400 text-purple-900 font-bold px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition transform hover:scale-105 text-base"
                         >
                             Register
                         </button>
