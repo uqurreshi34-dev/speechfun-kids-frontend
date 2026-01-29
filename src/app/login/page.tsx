@@ -42,7 +42,7 @@ export default function Login() {
         <main className="min-h-screen flex items-center justify-center px-4">
             <div className="bg-white/90 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-md border border-green-200">
                 <h1>
-                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Welcome Back! </span> <span className="text-4xl>🎉</span>
+                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Welcome Back! </span> <span className="text-4xl">🎉</span>
                 </h1>
 
                 <form onSubmit={handleCredentials} className="space-y-6">
