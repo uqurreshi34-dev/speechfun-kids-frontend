@@ -56,7 +56,7 @@ export default function Login() {
 
             {/* Gradient Overlay – now on top of image */}
             <div
-                className="absolute inset-0 z-5"
+                className="absolute inset-0 z-7"
                 style={{
                     background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.85) 0%, rgba(118, 75, 162, 0.85) 50%, rgba(240, 147, 251, 0.85) 100%)',
                 }}
