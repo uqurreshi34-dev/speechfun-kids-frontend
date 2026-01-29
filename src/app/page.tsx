@@ -412,7 +412,7 @@ export default function Home() {
                               {word.audio && (
                                 <button
                                   onClick={() => playAudio(word.audio!)}
-                                  className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition"
+                                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition"
                                 >
                                   <Play size={20} /> Listen!
                                 </button>
@@ -425,7 +425,7 @@ export default function Home() {
                                   setAiHelperOpen(true);
                                   getAIHelp(word.word);
                                 }}
-                                className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600 text-white px-4 py-2 rounded-lg shadow-md transition"
+                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600 text-white px-4 py-2 rounded-lg shadow-md transition"
                               >
                                 <HelpCircle size={20} /> Ask AI Helper
                               </button>
@@ -450,13 +450,13 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
               <Link
                 href="/login"
-                className="bg-linear-to-r from-green-400 to-teal-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+                className="bg-gradient-to-r from-green-400 to-teal-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="bg-linear-to-r from-pink-400 to-purple-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+                className="bg-gradient-to-r from-pink-400 to-purple-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
               >
                 Register
               </Link>
@@ -465,7 +465,6 @@ export default function Home() {
           </div>
         )}
       </main >
-      {/* AI Helper Modal */}
       {/* AI Helper Modal - Magical Kid-Friendly Version */}
       {aiHelperOpen && selectedWord && (
         <div
