@@ -67,7 +67,7 @@ export default function Navbar({ totalStars }: NavbarProps) {
         { name: "Challenges", path: "/", icon: Home },
         { name: "Dashboard", path: "/dashboard", icon: BarChart3 },
         { name: "Yes/No Lab", path: "/yes-no" },
-        { name: "Functional Language", path: "/functional" },
+        { name: "Functional Language", path: "/functional-language-builder" },
         { name: "WH Explorer", path: "/wh-explorer" },
         { name: "Chatter Pics", path: "/chatter-pics" },
         { name: "Story Builder", path: "/story-builder" },
