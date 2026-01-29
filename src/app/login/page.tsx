@@ -48,7 +48,7 @@ export default function Login() {
                     src="/the-block-with-the-letter-b-in-the-boy-s_DjRnOEfTSAeWOz9g7oAW8g_4VlVk0H-RSu6txbQXmJ1aA.png"
                     alt="Kids learning and playing with speech bubbles – fun educational background"
                     fill
-                    className="object-cover opacity-60"  // ↑ increased slightly for visibility during debug
+                    className="object-cover opacity-80"  // ↑ increased slightly for visibility during debug
                     quality={85}  // good balance for background
                     priority      // preload since it's hero/background
                 />
