@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useWarmBackend } from "../hooks/useWarmBackend";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -16,6 +17,7 @@ export default function Register() {
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false)
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
 
 
     useWarmBackend();
@@ -33,19 +35,38 @@ export default function Register() {
                 password,
             });
 
-            // Show success message
-            alert(response.data.detail || "Check your email!");
+            // Success!
             setSuccess(true);
             setError("");
 
-        }
-        catch (err) {
+        } catch (err) {
+            setLoading(false); // ← Reset loading state on error
+
             if (axios.isAxiosError(err)) {
-                const detail = err.response?.data?.detail || 'registration failed';
-                setError(detail)
+                // Handle different error types
+                const errorData = err.response?.data;
+
+                if (errorData?.detail) {
+                    // Server returned a detail message
+                    setError(errorData.detail);
+                } else if (errorData?.username) {
+                    // Username validation error
+                    setError(`Username: ${errorData.username[0]}`);
+                } else if (errorData?.email) {
+                    // Email validation error
+                    setError(`Email: ${errorData.email[0]}`);
+                } else if (errorData?.password) {
+                    // Password validation error
+                    setError(`Password: ${errorData.password[0]}`);
+                } else {
+                    setError("Registration failed. Please check your information and try again.");
+                }
             } else {
-                setError("Network error. Try again.");
+                setError("Network error. Please check your connection and try again.");
             }
+
+            // Don't set loading to false in finally - only on error
+            // Success case keeps loading true until success screen shows
         }
     };
 
@@ -175,16 +196,26 @@ export default function Register() {
                         required
                         disabled={loading}
                     />
-                    <input
-                        type="password"
-                        placeholder="Create a password (min 8 characters)"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-4 rounded-xl border-2 border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-medium"
-                        required
-                        minLength={8}
-                        disabled={loading}
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Create a password (min 8 characters)"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-4 pr-12 rounded-xl border-2 border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-medium"
+                            required
+                            minLength={8}
+                            disabled={loading}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+                            disabled={loading}
+                        >
+                            {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
+                        </button>
+                    </div>
 
                     {error && (
                         <motion.div

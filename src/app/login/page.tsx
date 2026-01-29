@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useWarmBackend } from "../hooks/useWarmBackend";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -14,6 +15,7 @@ export default function Login() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false)
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
 
     useWarmBackend();
 
@@ -110,23 +112,26 @@ export default function Login() {
                         required
                         disabled={loading}
                     />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="
-                  w-full p-4 rounded-xl 
-                  border-2 border-purple-300 
-                  focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-400/50 
-                  text-lg font-medium 
-                  bg-white/80 
-                  transition-all duration-200
-                  disabled:opacity-60 disabled:cursor-not-allowed
-                "
-                        required
-                        disabled={loading}
-                    />
+
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-4 pr-12 rounded-xl border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 text-lg font-medium"
+                            required
+                            disabled={loading}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+                            disabled={loading}
+                        >
+                            {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
+                        </button>
+                    </div>
 
                     {error && (
                         <motion.div
