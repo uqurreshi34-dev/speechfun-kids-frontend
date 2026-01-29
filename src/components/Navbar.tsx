@@ -121,7 +121,7 @@ export default function Navbar() {
         { name: "Challenges", path: "/", icon: Home },
         { name: "Dashboard", path: "/dashboard", icon: BarChart3 },
         { name: "Yes/No Lab", path: "/yes-no", icon: CheckSquare },
-        { name: "Functional Language", path: "/functional", icon: MessageSquare },
+        { name: "Functional Language", path: "/functional-language-builder", icon: MessageSquare },
         { name: "WH Explorer", path: "/wh-explorer", icon: HelpCircle },
         { name: "Chatter Pics", path: "/chatter-pics", icon: Image },
         { name: "Story Builder", path: "/story-builder", icon: BookOpen },
