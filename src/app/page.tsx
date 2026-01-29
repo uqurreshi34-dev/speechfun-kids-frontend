@@ -466,54 +466,90 @@ export default function Home() {
         )}
       </main >
       {/* AI Helper Modal */}
+      {/* AI Helper Modal - Magical Kid-Friendly Version */}
       {aiHelperOpen && selectedWord && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setAiHelperOpen(false)}
         >
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            className="relative bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 rounded-3xl p-8 max-w-md w-full shadow-2xl border-4 border-white"
+            style={{
+              boxShadow: '0 0 40px rgba(167, 139, 250, 0.6), 0 0 80px rgba(236, 72, 153, 0.4)'
+            }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-bold text-purple-700 flex items-center gap-2">
-                <span className="text-3xl">🤖</span> AI Helper
-              </h3>
-              <button
-                onClick={() => setAiHelperOpen(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+            {/* Floating Stars Decoration */}
+            <div className="absolute -top-4 -left-4 text-4xl animate-bounce">⭐</div>
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce" style={{ animationDelay: '0.2s' }}>✨</div>
+            <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce" style={{ animationDelay: '0.4s' }}>🌟</div>
+            <div className="absolute -bottom-4 -right-4 text-4xl animate-bounce" style={{ animationDelay: '0.6s' }}>💫</div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setAiHelperOpen(false)}
+              className="absolute top-4 right-4 text-purple-600 hover:text-purple-800 text-3xl font-bold bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:scale-110 transition"
+            >
+              ×
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-6">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 10, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="text-6xl mb-2"
               >
-                ×
-              </button>
+                🤖
+              </motion.div>
+              <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                AI Helper
+              </h3>
+              <p className="text-purple-600 font-bold">Let me help you learn!</p>
             </div>
 
-            <div className="mb-4 p-4 bg-purple-50 rounded-xl">
-              <p className="text-3xl font-bold text-center text-purple-700">
-                {selectedWord.word}
+            {/* Word Display */}
+            <div className="mb-6 p-6 bg-gradient-to-r from-yellow-200 via-pink-200 to-purple-200 rounded-2xl border-4 border-white shadow-lg">
+              <p className="text-4xl font-black text-center text-purple-700">
+                {selectedWord.word} 🎯
               </p>
             </div>
 
+            {/* AI Explanation */}
             {loadingAI ? (
               <div className="flex flex-col items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
-                <p className="text-gray-600">AI is thinking... 🤔</p>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                  className="text-6xl mb-4"
+                >
+                  🌈
+                </motion.div>
+                <p className="text-xl font-bold text-purple-600">AI is thinking... 🤔</p>
               </div>
             ) : (
-              <div className="bg-linear-to-br from-blue-50 to-purple-50 p-4 rounded-xl">
-                <p className="text-gray-800 whitespace-pre-line leading-relaxed">
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border-2 border-purple-200 mb-6">
+                <p className="text-lg text-gray-800 leading-relaxed font-medium" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
                   {aiExplanation}
                 </p>
               </div>
             )}
 
-            <button
+            {/* Action Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setAiHelperOpen(false)}
-              className="mt-6 w-full bg-linear-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-bold hover:opacity-90 transition"
+              className="w-full bg-gradient-to-r from-green-400 via-blue-400 to-purple-500 text-white py-4 rounded-2xl font-black text-xl shadow-lg hover:shadow-xl transition"
+              style={{
+                boxShadow: '0 4px 20px rgba(167, 139, 250, 0.5)'
+              }}
             >
-              Got it! Thanks! 👍
-            </button>
+              Got it! Thanks! 👍✨
+            </motion.button>
           </motion.div>
         </div>
       )}

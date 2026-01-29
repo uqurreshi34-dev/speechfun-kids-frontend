@@ -75,7 +75,7 @@ export default function Register() {
                     </p>
                     <button
                         onClick={() => router.push("/login")}
-                        className="w-full bg-linear-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition"
+                        className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition"
                     >
                         Go to Login
                     </button>
@@ -127,7 +127,7 @@ export default function Register() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-linear-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl text-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <>
