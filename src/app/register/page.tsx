@@ -6,6 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useWarmBackend } from "../hooks/useWarmBackend";
+import Image from "next/image";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -50,12 +51,24 @@ export default function Register() {
 
     if (success) {
         return (
-            <main
-                className="min-h-screen flex items-center justify-center px-4"
-                style={{
-                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                }}
-            >
+            <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+                {/* Background Image */}
+                <Image
+                    src="/the-block-with-the-letter-b-in-the-boy-s_DjRnOEfTSAeWOz9g7oAW8g_4VlVk0H-RSu6txbQXmJ1aA.png"
+                    alt="Kids learning"
+                    fill
+                    className="object-cover -z-10 opacity-20"
+                    quality={100}
+                    priority
+                />
+
+                {/* Gradient Overlay */}
+                <div
+                    className="absolute inset-0 -z-5"
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.9) 0%, rgba(245, 87, 108, 0.9) 100%)',
+                    }}
+                />
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -92,12 +105,24 @@ export default function Register() {
     }
 
     return (
-        <main
-            className="min-h-screen flex items-center justify-center px-4 relative"
-            style={{
-                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #ffd876 100%)',
-            }}
-        >
+        <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+            {/* Background Image */}
+            <Image
+                src="/the-block-with-the-letter-b-in-the-boy-s_DjRnOEfTSAeWOz9g7oAW8g_4VlVk0H-RSu6txbQXmJ1aA.png"
+                alt="Kids learning"
+                fill
+                className="object-cover -z-10 opacity-20"
+                quality={100}
+                priority
+            />
+
+            {/* Gradient Overlay */}
+            <div
+                className="absolute inset-0 -z-5"
+                style={{
+                    background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.9) 0%, rgba(245, 87, 108, 0.9) 50%, rgba(255, 216, 118, 0.9) 100%)',
+                }}
+            />
             {/* Background Decoration */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-10 left-10 text-6xl animate-bounce">🎨</div>

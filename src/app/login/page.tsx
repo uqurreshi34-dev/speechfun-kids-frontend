@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useWarmBackend } from "../hooks/useWarmBackend";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -40,12 +41,24 @@ export default function Login() {
     };
 
     return (
-        <main
-            className="min-h-screen flex items-center justify-center px-4 py-8 relative"  // ← Added py-8
-            style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-            }}
-        >
+        <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+            {/* Background Image */}
+            <Image
+                src="/the-block-with-the-letter-b-in-the-boy-s_DjRnOEfTSAeWOz9g7oAW8g_4VlVk0H-RSu6txbQXmJ1aA.png"
+                alt="Kids learning"
+                fill
+                className="object-cover -z-10 opacity-20"
+                quality={100}
+                priority
+            />
+
+            {/* Gradient Overlay */}
+            <div
+                className="absolute inset-0 -z-5"
+                style={{
+                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 50%, rgba(240, 147, 251, 0.9) 100%)',
+                }}
+            />
             {/* Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-10 left-10 text-6xl animate-bounce">⭐</div>
