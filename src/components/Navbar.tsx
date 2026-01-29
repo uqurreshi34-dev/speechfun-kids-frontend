@@ -89,11 +89,6 @@ export default function Navbar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [mobileMenuOpen]);
 
-    // Hide navbar on login/register pages
-    if (pathname === "/login" || pathname === "/register") {
-        return null;
-    }
-
     // Minimal navbar for not logged in
     if (!session) {
         return (
