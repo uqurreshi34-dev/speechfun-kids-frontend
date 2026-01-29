@@ -106,25 +106,27 @@ export default function Register() {
 
     return (
         <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
-            {/* Background Image */}
-            <Image
-                src="/the-block-with-the-letter-b-in-the-boy-s_DjRnOEfTSAeWOz9g7oAW8g_4VlVk0H-RSu6txbQXmJ1aA.png"
-                alt="Kids learning"
-                fill
-                className="object-cover -z-10 opacity-20"
-                quality={100}
-                priority
-            />
+            {/* Background Image Container – explicit positioning */}
+            <div className="absolute inset-0 z-0">
+                <Image
+                    src="/the-block-with-the-letter-b-in-the-boy-s_DjRnOEfTSAeWOz9g7oAW8g_4VlVk0H-RSu6txbQXmJ1aA.png"
+                    alt="Kids learning and playing with speech bubbles – fun educational background"
+                    fill
+                    className="object-cover opacity-100"  // ↑ increased slightly for visibility during debug
+                    quality={85}  // good balance for background
+                    priority      // preload since it's hero/background
+                />
+            </div>
 
-            {/* Gradient Overlay */}
+            {/* Gradient Overlay – now on top of image */}
             <div
-                className="absolute inset-0 -z-5"
+                className="absolute inset-0 z-5"
                 style={{
-                    background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.9) 0%, rgba(245, 87, 108, 0.9) 50%, rgba(255, 216, 118, 0.9) 100%)',
+                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.85) 0%, rgba(118, 75, 162, 0.85) 50%, rgba(240, 147, 251, 0.85) 100%)',
                 }}
             />
             {/* Background Decoration */}
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden z-10">
                 <div className="absolute top-10 left-10 text-6xl animate-bounce">🎨</div>
                 <div className="absolute top-20 right-20 text-5xl animate-bounce" style={{ animationDelay: '0.2s' }}>🌟</div>
                 <div className="absolute bottom-20 left-20 text-6xl animate-bounce" style={{ animationDelay: '0.4s' }}>🎪</div>
