@@ -1,7 +1,7 @@
 // contexts/StarsContext.tsx
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
 
@@ -47,8 +47,8 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         getAuthToken();
     }, [session]);
 
-    // Load stars when token is ready
-    const refreshStars = async () => {
+    // Stable refresh function with useCallback
+    const refreshStars = useCallback(async () => {
         if (!authToken) return;
 
         setLoading(true);
@@ -65,21 +65,23 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [authToken]); // ← authToken is the only dep
 
-    // Load stars initially
+    // Load stars initially when token is ready
     useEffect(() => {
         if (authToken) {
             refreshStars();
         }
-    }, [authToken]);
+    }, [authToken, refreshStars]); // ← now includes refreshStars (stable)
 
     // Add a star (optimistic update)
     const addStar = (challengeId: number) => {
         setCompletedChallenges((prev) => {
             const newSet = new Set(prev);
-            newSet.add(challengeId);
-            setStars(newSet.size);
+            if (!newSet.has(challengeId)) {
+                newSet.add(challengeId);
+                setStars(newSet.size);
+            }
             return newSet;
         });
     };
