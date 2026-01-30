@@ -27,10 +27,36 @@ export default function YesNoLab() {
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | "already_done" | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { status } = useSession();
+    const { data: session, status } = useSession();
+    const [authToken, setAuthToken] = useState<string | null>(null);
 
     // ← Use context instead of local state!
-    const { stars, authToken, completedChallenges, addStar } = useStars();
+    const { stars, completedChallenges, addStar } = useStars();
+
+    // Get or create Django auth token
+    useEffect(() => {
+        if (!session?.user?.email) return;
+
+        const getAuthToken = async () => {
+            try {
+                const response = await axios.post(
+                    `${backendUrl}/api/users/get-or-create-token/`,
+                    {
+                        email: session.user.email,
+                        username: session.user.name || session.user.email,
+                    }
+                );
+
+                const token = response.data.token;
+                setAuthToken(token);
+                console.log("Auth token obtained:", token);
+            } catch (err) {
+                console.error("Failed to get auth token", err);
+            }
+        };
+
+        getAuthToken();
+    }, [session?.user?.email, session?.user?.name]);
 
     // Fetch questions
     useEffect(() => {
