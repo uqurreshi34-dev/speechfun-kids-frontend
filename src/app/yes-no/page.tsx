@@ -28,6 +28,7 @@ export default function YesNoLab() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { data: session, status } = useSession();
+    const [authToken, setAuthToken] = useState<string | null>(null);
 
     // ── NEW: Use global StarsContext
     const { stars, completedChallenges, addStar, loading: starsLoading } = useStars();
@@ -35,8 +36,35 @@ export default function YesNoLab() {
     // Removed: local authToken state (handled in StarsProvider)
     // Removed: separate token fetching (StarsProvider already does it)
 
+    // Get auth token
+    useEffect(() => {
+        if (!session?.user?.email) return;
+
+        const getAuthToken = async () => {
+            try {
+                const response = await axios.post(
+                    `${backendUrl}/api/users/get-or-create-token/`,
+                    {
+                        email: session.user.email,
+                        username: session.user.name || session.user.email,
+                    }
+                );
+
+                const token = response.data.token;
+                setAuthToken(response.data.token);
+                console.log("Auth token obtained:", token);
+            } catch (err) {
+                console.error("Failed to get auth token", err);
+            }
+        };
+
+        getAuthToken();
+    }, [session?.user?.email, session?.user?.name]);
+
     // Fetch questions (unchanged, but added error handling)
     useEffect(() => {
+        if (!authToken) return;
+
         const fetchQuestions = async () => {
             try {
                 const res = await axios.get(`${backendUrl}/api/challenges/yes-no-questions/`); // adjust endpoint if needed
