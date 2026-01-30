@@ -9,6 +9,7 @@ import axios from "axios";
 import Link from "next/link";
 import SpeechButton from "@/components/SpeechButton";
 import confetti from "canvas-confetti";
+import { useStars } from "@/contexts/StarsContext";  // ← NEW IMPORT
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -35,27 +36,25 @@ interface Challenge {
   created_at: string;
 }
 
-interface ProgressItem {
-  challenge: number;
-  completed: boolean;
-  score: number;
-}
-
 export default function Home() {
   const { data: session, status } = useSession();
+
+  // ── NEW: Use global StarsContext instead of local state
+  const { stars: totalStars, completedChallenges, addStar, loading: starsLoading } = useStars();
+
   const [letters, setLetters] = useState<Letter[]>([]);
   const [selectedLetter, setSelectedLetter] = useState<number | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("easy");
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [words, setWords] = useState<Word[]>([]);
-  const [completedChallenges, setCompletedChallenges] = useState<Set<number>>(new Set());
-  const [totalStars, setTotalStars] = useState<number>(0);
-  const [progressLoaded, setProgressLoaded] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [aiHelperOpen, setAiHelperOpen] = useState(false);
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   const [aiExplanation, setAiExplanation] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
+
+  // Removed: local completedChallenges, totalStars, progressLoaded states
+  // Removed: the entire progress loading useEffect (now handled in StarsProvider)
 
   useEffect(() => {
     axios
@@ -64,7 +63,7 @@ export default function Home() {
       .catch((err) => console.error("Failed to load letters", err));
   }, []);
 
-  // Get or create Django auth token
+  // Get or create Django auth token (unchanged)
   useEffect(() => {
     if (!session?.user?.email) return;
 
@@ -88,29 +87,6 @@ export default function Home() {
 
     getAuthToken();
   }, [session?.user?.email, session?.user?.name]);
-
-  // Load user's progress
-  useEffect(() => {
-    if (!authToken || progressLoaded) return;
-
-    const loadProgress = async () => {
-      try {
-        const res = await axios.get(`${backendUrl}/api/challenges/progress/`, {
-          headers: { Authorization: `Token ${authToken}` },
-        });
-
-        const completed = new Set<number>(res.data.map((p: ProgressItem) => p.challenge));
-        setCompletedChallenges(completed);
-        setTotalStars(completed.size);
-        setProgressLoaded(true);
-      } catch (err) {
-        console.error("Failed to load progress", err);
-        setProgressLoaded(true);
-      }
-    };
-
-    loadProgress();
-  }, [authToken, progressLoaded]);
 
   const loadChallenges = async (letterId: number, difficulty: string) => {
     try {
@@ -151,7 +127,7 @@ export default function Home() {
     }
   };
 
-  // Confetti function
+  // Confetti function (unchanged)
   const fireConfetti = () => {
     confetti({
       particleCount: 100,
@@ -161,44 +137,29 @@ export default function Home() {
   };
 
   const handleSpeechResult = async (isCorrect: boolean, transcript: string, challengeId: number) => {
+    // Changed: Use context's completedChallenges Set
     if (completedChallenges.has(challengeId)) {
       alert(isCorrect ? `✅ Already completed!` : `❌ Try again!`);
       return;
     }
 
     if (isCorrect) {
-      const success = await handleEarnStar(challengeId);
-      if (success) {
+      // Changed: Use global addStar() — now async and saves to backend
+      try {
+        await addStar(challengeId);   // ← this persists + updates Navbar instantly
         fireConfetti();
         alert(`🎉 Perfect! You said "${transcript}". Star earned! ⭐`);
+      } catch (err) {
+        console.error("Failed to award star", err);
+        alert("Failed to save star. Please try again.");
       }
     } else {
       alert(`❌ Not quite! You said "${transcript}" Try again!`);
     }
   };
 
-  const handleEarnStar = async (challengeId: number): Promise<boolean> => {
-    if (!authToken) {
-      alert("Auth still loading...");
-      return false;
-    }
-
-    try {
-      await axios.post(
-        `${backendUrl}/api/challenges/progress/update/`,
-        { challenge: challengeId, completed: true, score: 100 },
-        { headers: { Authorization: `Token ${authToken}`, "Content-Type": "application/json" } }
-      );
-
-      setCompletedChallenges((prev) => new Set([...prev, challengeId]));
-      setTotalStars((prev) => prev + 1);
-      return true;
-    } catch (err) {
-      console.error("Progress update failed", err);
-      alert("Failed to save star.");
-      return false;
-    }
-  };
+  // Removed: handleEarnStar function entirely
+  //   → logic moved into StarsContext.addStar()
 
   const playAudio = (audioPath: string | null) => {
     if (!audioPath) return;
@@ -234,7 +195,7 @@ export default function Home() {
     }
   };
 
-  if (status === "loading") return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  if (status === "loading" || starsLoading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
   return (
     <>
@@ -248,11 +209,13 @@ export default function Home() {
                 </p>
                 <p className="text-lg text-yellow-600 font-bold mt-1 flex items-center gap-2">
                   <Star size={20} fill="gold" className="text-yellow-500" />
-                  Stars: {totalStars}
+                  Stars: {totalStars}   {/* ← now from context */}
+                  {starsLoading && <span className="text-sm text-gray-500">(syncing...)</span>}
                 </p>
               </div>
             </div>
 
+            {/* Rest of your UI remains completely unchanged ↓ */}
             {selectedLetter && (
               <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center">
                 <div className="inline-flex items-center gap-3 bg-white/90 p-3 rounded-xl shadow-lg border-2 border-purple-300">
@@ -450,7 +413,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* AI Helper Modal */}
+      {/* AI Helper Modal – unchanged */}
       {aiHelperOpen && selectedWord && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
