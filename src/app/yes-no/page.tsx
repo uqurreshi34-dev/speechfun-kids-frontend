@@ -138,7 +138,6 @@ export default function YesNoLab() {
 
     return (
         <>
-            <Navbar />
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
                 <h1 className="text-4xl sm:text-5xl font-black text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
                     Yes / No Lab 🎈
