@@ -9,7 +9,7 @@ import axios from "axios";
 import confetti from "canvas-confetti";
 import { useSession } from "next-auth/react";
 import { useStars } from "@/contexts/StarsContext";  // ← NEW IMPORT
-import Navbar from "@/components/Navbar";
+
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -39,7 +39,7 @@ export default function YesNoLab() {
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                const res = await axios.get(`${backendUrl}/api/yes-no/questions/`); // adjust endpoint if needed
+                const res = await axios.get(`${backendUrl}/api/challenges/yes-no-questions/`); // adjust endpoint if needed
                 setQuestions(res.data);
                 setLoading(false);
             } catch (err) {
