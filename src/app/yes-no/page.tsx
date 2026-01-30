@@ -78,7 +78,7 @@ export default function YesNoLab() {
         };
 
         fetchQuestions();
-    }, []);
+    }, [authToken]);
 
     const handleAnswer = async (answer: "Yes" | "No") => {
         const question = questions[currentIndex];
