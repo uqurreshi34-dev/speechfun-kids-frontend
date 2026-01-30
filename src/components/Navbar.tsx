@@ -9,74 +9,15 @@ import {
     Image, BookOpen, Volume2, XCircle
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
-
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-
-// Type for progress items (fixes "any" error)
-interface ProgressItem {
-    challenge: number;
-    completed: boolean;
-    score: number;
-}
+import { useStars } from "@/contexts/StarsContext";
 
 export default function Navbar() {
     const { data: session } = useSession();
     const router = useRouter();
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [authToken, setAuthToken] = useState<string | null>(null);
-    const [stars, setStars] = useState(0);
-    const [loadingStars, setLoadingStars] = useState(false);
-
+    const { stars, loading: loadingStars } = useStars(); // ← Use context!
     const menuRef = useRef<HTMLDivElement>(null);
-
-
-
-    // Get auth token when session changes
-    useEffect(() => {
-        if (!session?.user?.email) return;
-
-        const getAuthToken = async () => {
-            try {
-                const res = await axios.post(
-                    `${backendUrl}/api/users/get-or-create-token/`,
-                    {
-                        email: session.user.email,
-                        username: session.user.name || session.user.email,
-                    }
-                );
-                setAuthToken(res.data.token);
-            } catch (err) {
-                console.error("Failed to get token", err);
-            }
-        };
-
-        getAuthToken();
-    }, [session]);
-
-    // Load stars when authToken is ready
-    useEffect(() => {
-        if (!authToken) return;
-
-        const loadStars = async () => {
-            setLoadingStars(true);
-            try {
-                const res = await axios.get(`${backendUrl}/api/challenges/progress/`, {
-                    headers: { Authorization: `Token ${authToken}` },
-                });
-                // Type res.data as ProgressItem[]
-                const completed = (res.data as ProgressItem[]).filter(p => p.completed).length;
-                setStars(completed);
-            } catch (err) {
-                console.error("Failed to load stars", err);
-            } finally {
-                setLoadingStars(false);
-            }
-        };
-
-        loadStars();
-    }, [authToken]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -89,12 +30,10 @@ export default function Navbar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [mobileMenuOpen]);
 
-    // Minimal navbar for not logged in
     if (!session) {
-        return
+        return null;
     }
 
-    // Full navbar for logged-in users
     const tabs = [
         { name: "Challenges", path: "/", icon: Home },
         { name: "Dashboard", path: "/dashboard", icon: BarChart3 },

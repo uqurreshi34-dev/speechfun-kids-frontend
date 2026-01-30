@@ -8,6 +8,8 @@ import { CheckCircle, XCircle, ArrowRight, Star } from "lucide-react";
 import axios from "axios";
 import confetti from "canvas-confetti";
 import { useSession } from "next-auth/react";
+import { useStars } from "@/contexts/StarsContext"; // ← Add this import
+import Navbar from "@/components/Navbar"; // ← Add navbar
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -15,7 +17,7 @@ interface YesNoQuestion {
     id: number;
     scene_description: string;
     question: string;
-    correct_answer: string; // "Yes" or "No"
+    correct_answer: string;
     visual_url: string | null;
 }
 
@@ -25,36 +27,10 @@ export default function YesNoLab() {
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | "already_done" | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [totalStars, setTotalStars] = useState<number>(0);
-    const [completedChallenges, setCompletedChallenges] = useState<Set<number>>(new Set());
-    const [authToken, setAuthToken] = useState<string | null>(null);
-    const { data: session, status } = useSession();
+    const { status } = useSession();
 
-    // Get or create Django auth token
-    useEffect(() => {
-        if (!session?.user?.email) return;
-
-        const getAuthToken = async () => {
-            try {
-                const response = await axios.post(
-                    `${backendUrl}/api/users/get-or-create-token/`,
-                    {
-                        email: session.user.email,
-                        username: session.user.name || session.user.email,
-                    }
-                );
-
-                const token = response.data.token;
-                setAuthToken(token);
-                console.log("Auth token obtained:", token);
-            } catch (err) {
-                console.error("Failed to get auth token", err);
-            }
-        };
-
-        getAuthToken();
-    }, [session?.user?.email, session?.user?.name]);
-
+    // ← Use context instead of local state!
+    const { stars, authToken, completedChallenges, addStar } = useStars();
 
     // Fetch questions
     useEffect(() => {
@@ -76,7 +52,7 @@ export default function YesNoLab() {
         fetchQuestions();
     }, []);
 
-    // handleEarnStar – your exact logic from app/page.tsx
+    // Simplified handleEarnStar using context
     const handleEarnStar = async (challengeId: number): Promise<boolean> => {
         if (!authToken) {
             alert("Auth still loading...");
@@ -90,14 +66,7 @@ export default function YesNoLab() {
                 { headers: { Authorization: `Token ${authToken}`, "Content-Type": "application/json" } }
             );
 
-            setCompletedChallenges((prev) => {
-                const newSet = new Set(prev);
-                newSet.add(challengeId);
-                return newSet;
-            });
-
-            setTotalStars((prev) => prev + 1);
-
+            addStar(challengeId); // ← Update global state!
             return true;
         } catch (err) {
             console.error("Progress update failed", err);
@@ -117,10 +86,13 @@ export default function YesNoLab() {
 
     if (error || questions.length === 0) {
         return (
-            <main className="container mx-auto px-4 py-12 text-center">
-                <h1 className="text-4xl font-bold text-purple-700 mb-8">Yes/No Lab</h1>
-                <p className="text-xl text-gray-700">{error || "No questions yet — check back soon! 🎈"}</p>
-            </main>
+            <>
+                <Navbar />
+                <main className="container mx-auto px-4 py-12 text-center">
+                    <h1 className="text-4xl font-bold text-purple-700 mb-8">Yes/No Lab</h1>
+                    <p className="text-xl text-gray-700">{error || "No questions yet — check back soon! 🎈"}</p>
+                </main>
+            </>
         );
     }
 
@@ -165,125 +137,129 @@ export default function YesNoLab() {
     };
 
     return (
-        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
-            <h1 className="text-4xl sm:text-5xl font-black text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
-                Yes / No Lab 🎈
-            </h1>
+        <>
+            <Navbar />
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
+                <h1 className="text-4xl sm:text-5xl font-black text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                    Yes / No Lab 🎈
+                </h1>
 
-            <div className="text-center mb-6">
-                <p className="text-xl font-bold text-yellow-600 flex items-center justify-center gap-2">
-                    <Star size={24} fill="gold" className="text-yellow-500" />
-                    Stars: {totalStars}
-                </p>
-            </div>
+                <div className="text-center mb-6">
+                    <p className="text-xl font-bold text-yellow-600 flex items-center justify-center gap-2">
+                        <Star size={24} fill="gold" className="text-yellow-500" />
+                        Stars: {stars}
+                    </p>
+                </div>
 
-            <div className="bg-white/85 backdrop-blur-lg p-6 sm:p-10 rounded-3xl shadow-2xl border-4 border-purple-200 max-w-4xl mx-auto">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={currentIndex}
-                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -30, scale: 0.95 }}
-                        transition={{ duration: 0.6, type: "spring", stiffness: 120 }}
-                        className="space-y-8"
-                    >
-                        {/* Visual */}
-                        <div className="relative h-64 sm:h-80 md:h-96 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 rounded-2xl overflow-hidden border-4 border-purple-100 shadow-inner">
-                            {current.visual_url ? (
-                                current.visual_url.endsWith('.mp4') ? (
-                                    <video
-                                        src={current.visual_url}
-                                        autoPlay
-                                        loop
-                                        muted
-                                        playsInline
-                                        className="w-full h-full object-cover"
-                                    />
+                <div className="bg-white/85 backdrop-blur-lg p-6 sm:p-10 rounded-3xl shadow-2xl border-4 border-purple-200 max-w-4xl mx-auto">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentIndex}
+                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -30, scale: 0.95 }}
+                            transition={{ duration: 0.6, type: "spring", stiffness: 120 }}
+                            className="space-y-8"
+                        >
+                            {/* Visual */}
+                            <div className="relative h-64 sm:h-80 md:h-96 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 rounded-2xl overflow-hidden border-4 border-purple-100 shadow-inner">
+                                {current.visual_url ? (
+                                    current.visual_url.endsWith('.mp4') ? (
+                                        <video
+                                            src={current.visual_url}
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={current.visual_url}
+                                            alt={current.scene_description || "Visual scene"}
+                                            fill
+                                            className="object-cover rounded-2xl"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+                                            priority={currentIndex < 3}
+                                        />
+                                    )
                                 ) : (
-                                    <Image
-                                        src={current.visual_url}
-                                        alt={current.scene_description || "Visual scene"}
-                                        fill
-                                        className="object-cover rounded-2xl"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-                                        priority={currentIndex < 3}
-                                    />
-                                )
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-gray-500 text-lg sm:text-xl font-medium">
-                                    [Visual: {current.scene_description}]
-                                </div>
-                            )}
-                        </div>
+                                    <div className="flex items-center justify-center h-full text-gray-500 text-lg sm:text-xl font-medium">
+                                        [Visual: {current.scene_description}]
+                                    </div>
+                                )}
+                            </div>
 
-                        {/* Question with permanent star if completed */}
-                        <div className="flex items-center justify-center gap-4">
-                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-indigo-700 leading-tight">
-                                {current.question}
-                            </h2>
-                            {isCompleted && (
-                                <Star size={36} fill="gold" className="text-yellow-500 animate-pulse" />
-                            )}
-                        </div>
+                            {/* Question with permanent star if completed */}
+                            <div className="flex items-center justify-center gap-4">
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-indigo-700 leading-tight">
+                                    {current.question}
+                                </h2>
+                                {isCompleted && (
+                                    <Star size={36} fill="gold" className="text-yellow-500 animate-pulse" />
+                                )}
+                            </div>
 
-                        {/* Feedback */}
-                        <AnimatePresence>
-                            {feedback && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    className={`text-center text-3xl sm:text-4xl font-extrabold py-4 ${feedback === "correct" ? "text-green-600" :
-                                        feedback === "incorrect" ? "text-red-600" :
-                                            "text-blue-600"
-                                        }`}
+                            {/* Feedback */}
+                            <AnimatePresence>
+                                {feedback && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        className={`text-center text-3xl sm:text-4xl font-extrabold py-4 ${feedback === "correct" ? "text-green-600" :
+                                            feedback === "incorrect" ? "text-red-600" :
+                                                "text-blue-600"
+                                            }`}
+                                    >
+                                        {feedback === "correct" ? "Yay! Correct! 🎉⭐" :
+                                            feedback === "incorrect" ? "Oops! Try again! 😊" :
+                                                "Already completed! 🌟"}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Yes / No Buttons */}
+                            <div className="flex flex-col sm:flex-row justify-center gap-6 sm:gap-12 pt-4">
+                                <motion.button
+                                    whileHover={{ scale: 1.08 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleAnswer("Yes")}
+                                    disabled={feedback !== null}
+                                    className="flex-1 bg-gradient-to-br from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-black text-2xl sm:text-3xl py-6 sm:py-8 rounded-3xl shadow-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
                                 >
-                                    {feedback === "correct" ? "Yay! Correct! 🎉⭐" :
-                                        feedback === "incorrect" ? "Oops! Try again! 😊" :
-                                            "Already completed! 🌟"}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                    <CheckCircle size={40} />
+                                    YES
+                                </motion.button>
 
-                        {/* Yes / No Buttons */}
-                        <div className="flex flex-col sm:flex-row justify-center gap-6 sm:gap-12 pt-4">
-                            <motion.button
-                                whileHover={{ scale: 1.08 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => handleAnswer("Yes")}
-                                disabled={feedback !== null}
-                                className="flex-1 bg-gradient-to-br from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-black text-2xl sm:text-3xl py-6 sm:py-8 rounded-3xl shadow-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
-                            >
-                                <CheckCircle size={40} />
-                                YES
-                            </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.08 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleAnswer("No")}
+                                    disabled={feedback !== null}
+                                    className="flex-1 bg-gradient-to-br from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white font-black text-2xl sm:text-3xl py-6 sm:py-8 rounded-3xl shadow-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
+                                >
+                                    <XCircle size={40} />
+                                    NO
+                                </motion.button>
+                            </div>
 
-                            <motion.button
-                                whileHover={{ scale: 1.08 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => handleAnswer("No")}
-                                disabled={feedback !== null}
-                                className="flex-1 bg-gradient-to-br from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white font-black text-2xl sm:text-3xl py-6 sm:py-8 rounded-3xl shadow-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
-                            >
-                                <XCircle size={40} />
-                                NO
-                            </motion.button>
-                        </div>
-
-                        {/* Next Arrow */}
-                        <div className="flex justify-center pt-6">
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={goToNext}
-                                className="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-full shadow-lg transition transform hover:scale-110"
-                            >
-                                <ArrowRight size={32} />
-                            </motion.button>
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-        </main>
+                            {/* Next Arrow */}
+                            <div className="flex justify-center pt-6">
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={goToNext}
+                                    className="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-full shadow-lg transition transform hover:scale-110"
+                                >
+                                    <ArrowRight size={32} />
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+            </main>
+        </>
     );
 }
+
