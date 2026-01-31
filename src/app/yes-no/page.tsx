@@ -20,28 +20,35 @@ interface YesNoQuestion {
 }
 
 export default function YesNoLab() {
+    const { data: session } = useSession();
     const [questions, setQuestions] = useState<YesNoQuestion[]>([]);
-    // Initialize currentIndex from sessionStorage
+
+    // Initialize currentIndex from sessionStorage with user-specific key
     const [currentIndex, setCurrentIndex] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const savedIndex = sessionStorage.getItem('yesNoCurrentIndex');
+        if (typeof window !== 'undefined' && session?.user?.email) {
+            const key = `yesNoCurrentIndex_${session.user.email}`;
+            const savedIndex = sessionStorage.getItem(key);
             return savedIndex !== null ? parseInt(savedIndex, 10) : 0;
         }
         return 0;
     });
+
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
-    const [justCompleted, setJustCompleted] = useState(false); // Track if just completed this session
+    const [justCompleted, setJustCompleted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const [authToken, setAuthToken] = useState<string | null>(null);
 
     const { stars, completedChallenges, addStar, loading: starsLoading } = useStars();
 
-    // Save current index to sessionStorage whenever it changes
+    // Save current index to sessionStorage with user-specific key
     useEffect(() => {
-        sessionStorage.setItem('yesNoCurrentIndex', currentIndex.toString());
-    }, [currentIndex]);
+        if (session?.user?.email) {
+            const key = `yesNoCurrentIndex_${session.user.email}`;
+            sessionStorage.setItem(key, currentIndex.toString());
+        }
+    }, [currentIndex, session?.user?.email]);
 
     // Get auth token
     useEffect(() => {
@@ -106,7 +113,7 @@ export default function YesNoLab() {
 
         if (isCorrect && !completedChallenges.has(question.id)) {
             confetti();
-            setJustCompleted(true); // Mark as just completed in this session
+            setJustCompleted(true);
 
             try {
                 await addStar(question.id, 'yes_no');
@@ -121,7 +128,7 @@ export default function YesNoLab() {
         if (currentIndex < questions.length - 1) {
             setCurrentIndex(currentIndex + 1);
             setFeedback(null);
-            setJustCompleted(false); // Reset when navigating
+            setJustCompleted(false);
         }
     };
 
@@ -129,7 +136,7 @@ export default function YesNoLab() {
         if (currentIndex > 0) {
             setCurrentIndex(currentIndex - 1);
             setFeedback(null);
-            setJustCompleted(false); // Reset when navigating
+            setJustCompleted(false);
         }
     };
 
@@ -194,15 +201,16 @@ export default function YesNoLab() {
                             </div>
                         )}
 
-                        {/* Visual - Fixed sizing */}
+                        {/* Visual - Fixed sizing with white background */}
                         {question.visual_url && (
-                            <div className="relative w-full h-64 sm:h-80 mb-8 rounded-2xl overflow-hidden shadow-lg border-4 border-white">
+                            <div className="relative w-full h-64 sm:h-80 mb-8 rounded-2xl overflow-hidden shadow-lg border-4 border-white bg-white">
                                 <Image
                                     src={question.visual_url.startsWith("http") ? question.visual_url : `${backendUrl}${question.visual_url}`}
                                     alt={question.scene_description}
                                     fill
-                                    className="object-contain"
+                                    className="object-contain p-2"
                                     unoptimized
+                                    priority
                                 />
                             </div>
                         )}
