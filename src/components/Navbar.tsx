@@ -18,7 +18,7 @@ export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { stars, loading: loadingStars } = useStars();
     const menuRef = useRef<HTMLDivElement>(null);
-    // test
+    // test me
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (mobileMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
