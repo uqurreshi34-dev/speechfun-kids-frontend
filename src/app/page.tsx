@@ -146,7 +146,7 @@ export default function Home() {
     if (isCorrect) {
       // Changed: Use global addStar() — now async and saves to backend
       try {
-        await addStar(challengeId);   // ← this persists + updates Navbar instantly
+        await addStar(challengeId, 'letter');   // ← this persists + updates Navbar instantly
         fireConfetti();
         alert(`🎉 Perfect! You said "${transcript}". Star earned! ⭐`);
       } catch (err) {

@@ -97,7 +97,7 @@ export default function YesNoLab() {
 
             // Changed: Use global addStar() — now async and saves to backend
             try {
-                await addStar(question.id);  // ← persists progress + updates Navbar instantly
+                await addStar(question.id, 'yes_no');  // ← persists progress + updates Navbar instantly
             } catch (err) {
                 console.error("Failed to award star", err);
                 alert("Failed to save progress. Please try again.");

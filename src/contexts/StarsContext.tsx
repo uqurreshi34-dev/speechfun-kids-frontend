@@ -12,7 +12,7 @@ interface StarsContextType {
     authToken: string | null;
     completedChallenges: Set<number>;
     refreshStars: () => Promise<void>;
-    addStar: (challengeId: number) => Promise<boolean>; // returns success
+    addStar: (challengeId: number, challengeType?: 'letter' | 'yes_no') => Promise<boolean>; // returns success
     loading: boolean;
 }
 
@@ -72,11 +72,11 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         }
     }, [authToken, refreshStars]);
 
-    // Updated addStar with POST + refresh
-    const addStar = async (challengeId: number): Promise<boolean> => {
+    // Updated addStar – now sends challenge_type
+    const addStar = async (challengeId: number, challengeType: 'letter' | 'yes_no' = 'letter'): Promise<boolean> => {
         if (completedChallenges.has(challengeId)) return true;
 
-        // Optimistic
+        // Optimistic update (kept for smooth UI)
         setCompletedChallenges(prev => {
             const newSet = new Set(prev);
             newSet.add(challengeId);
@@ -87,7 +87,12 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         try {
             await axios.post(
                 `${backendUrl}/api/challenges/progress/update/`,
-                { challenge: challengeId, completed: true, score: 100 },
+                {
+                    challenge: challengeId,
+                    challenge_type: challengeType,  // ← This is the key line added!
+                    completed: true,
+                    score: 100
+                },
                 { headers: { Authorization: `Token ${authToken}`, "Content-Type": "application/json" } }
             );
 
@@ -97,7 +102,7 @@ export function StarsProvider({ children }: { children: ReactNode }) {
             return true;
         } catch (err) {
             console.error("Failed to save star", err);
-            // Rollback
+            // Rollback optimistic update
             setCompletedChallenges(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(challengeId);
