@@ -52,6 +52,11 @@ export default function Navbar() {
 
     const currentTab = tabs.find(tab => tab.path === pathname) || tabs[0];
 
+    const handleLogout = async () => {
+        await signOut({ redirect: false });
+        router.push("/login");
+    };
+
     return (
         <nav className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
             <div className="container mx-auto px-4 py-3">
@@ -88,8 +93,8 @@ export default function Navbar() {
                                             setDesktopDropdownOpen(false);
                                         }}
                                         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition border-b border-gray-100 last:border-b-0 ${pathname === tab.path
-                                                ? "bg-purple-50 text-purple-700 font-semibold"
-                                                : "hover:bg-gray-50"
+                                            ? "bg-purple-50 text-purple-700 font-semibold"
+                                            : "hover:bg-gray-50"
                                             }`}
                                     >
                                         <tab.icon size={18} />
@@ -113,7 +118,7 @@ export default function Navbar() {
                             )}
                         </div>
                         <button
-                            onClick={() => signOut({ callbackUrl: "/" })}
+                            onClick={handleLogout}
                             className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-sm"
                         >
                             <LogOut size={16} />
@@ -155,8 +160,8 @@ export default function Navbar() {
                                             setMobileMenuOpen(false);
                                         }}
                                         className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition border-b border-gray-100 last:border-b-0 ${pathname === tab.path
-                                                ? "bg-purple-50 text-purple-700 font-semibold"
-                                                : "hover:bg-gray-50"
+                                            ? "bg-purple-50 text-purple-700 font-semibold"
+                                            : "hover:bg-gray-50"
                                             }`}
                                     >
                                         <tab.icon size={20} />
@@ -166,7 +171,7 @@ export default function Navbar() {
 
                                 <button
                                     onClick={() => {
-                                        signOut({ callbackUrl: "/" });
+                                        handleLogout();
                                         setMobileMenuOpen(false);
                                     }}
                                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left text-red-600 hover:bg-red-50 transition border-t-2 border-gray-200"
