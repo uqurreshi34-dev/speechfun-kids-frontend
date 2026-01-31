@@ -16,7 +16,7 @@ export default function Navbar() {
     const router = useRouter();
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { stars, loading: loadingStars } = useStars(); // ← Use context!
+    const { stars, loading: loadingStars } = useStars();
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -48,49 +48,53 @@ export default function Navbar() {
 
     return (
         <nav className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
-            <div className="container mx-auto px-4 py-4">
+            <div className="container mx-auto px-4 py-3"> {/* Reduced py-4 → py-3 for compactness */}
                 {/* Desktop */}
                 <div className="hidden md:flex justify-between items-center">
                     <div className="text-2xl font-bold flex items-center gap-2">
                         SpeechFun Kids 🎤✨
                     </div>
 
-                    <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-2 scrollbar-hide">
+                    {/* Tabs: Wrap instead of scroll */}
+                    <div className="flex flex-wrap gap-3 lg:gap-4 items-center justify-center"> {/* ← Key change: flex-wrap + reduced gap */}
                         {tabs.map((tab) => (
                             <button
                                 key={tab.path}
                                 onClick={() => router.push(tab.path)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition whitespace-nowrap ${pathname === tab.path ? "bg-white/30 font-bold" : "hover:bg-white/20"
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition whitespace-nowrap text-sm lg:text-base
+                  ${pathname === tab.path
+                                        ? "bg-white/30 font-semibold shadow-sm"
+                                        : "hover:bg-white/20 hover:shadow-sm"
                                     }`}
                             >
-                                <tab.icon size={20} />
+                                <tab.icon size={18} className="lg:size-20" /> {/* Smaller icons */}
                                 {tab.name}
                             </button>
                         ))}
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
+                        <div className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg text-sm lg:text-base">
                             {loadingStars ? (
-                                <span className="text-sm">...</span>
+                                <span>...</span>
                             ) : (
                                 <>
-                                    <Star size={20} fill="gold" className="text-yellow-300" />
+                                    <Star size={18} fill="gold" className="text-yellow-300" />
                                     <span className="font-bold">{stars}</span>
                                 </>
                             )}
                         </div>
                         <button
                             onClick={() => signOut({ callbackUrl: "/" })}
-                            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
+                            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition text-sm lg:text-base"
                         >
-                            <LogOut size={20} />
+                            <LogOut size={18} />
                             Logout
                         </button>
                     </div>
                 </div>
 
-                {/* Mobile */}
+                {/* Mobile – unchanged */}
                 <div className="md:hidden">
                     <div className="flex justify-between items-center">
                         <div className="text-xl font-bold">SpeechFun Kids 🎤✨</div>
