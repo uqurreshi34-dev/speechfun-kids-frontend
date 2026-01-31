@@ -25,8 +25,24 @@ export function StarsProvider({ children }: { children: ReactNode }) {
     const [completedChallenges, setCompletedChallenges] = useState<Set<number>>(new Set());
     const [loading, setLoading] = useState(true);
 
-    // ✨ NEW: Track if we've already loaded to prevent redundant refreshes
     const hasLoadedRef = useRef(false);
+    // ✨ NEW: Track current user to detect user changes
+    const currentUserRef = useRef<string | null>(null);
+
+    // ✨ NEW: Reset state when user changes
+    useEffect(() => {
+        const userEmail = session?.user?.email || null;
+
+        // If user changed, reset everything
+        if (currentUserRef.current !== userEmail) {
+            currentUserRef.current = userEmail;
+            hasLoadedRef.current = false;
+            setStars(0);
+            setCompletedChallenges(new Set());
+            setAuthToken(null);
+            setLoading(true);
+        }
+    }, [session?.user?.email]);
 
     // Get auth token (unchanged)
     useEffect(() => {
@@ -62,7 +78,7 @@ export function StarsProvider({ children }: { children: ReactNode }) {
             const completed = new Set<number>(res.data.map((p: { challenge: number }) => p.challenge));
             setCompletedChallenges(completed);
             setStars(completed.size);
-            hasLoadedRef.current = true; // ✨ NEW: Mark as loaded
+            hasLoadedRef.current = true;
         } catch (err) {
             console.error("Failed to load stars", err);
         } finally {
@@ -70,7 +86,7 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         }
     }, [authToken]);
 
-    // ✨ CHANGED: Only refresh on initial load, not on every authToken change
+    // Only refresh on initial load per user
     useEffect(() => {
         if (authToken && !hasLoadedRef.current) {
             refreshStars();
@@ -99,10 +115,6 @@ export function StarsProvider({ children }: { children: ReactNode }) {
                 },
                 { headers: { Authorization: `Token ${authToken}`, "Content-Type": "application/json" } }
             );
-
-            // ✨ REMOVED: The refreshStars() call here was causing the reload!
-            // The optimistic update above is sufficient for UI responsiveness
-            // If you need to sync from backend occasionally, do it on page navigation instead
 
             return true;
         } catch (err) {
