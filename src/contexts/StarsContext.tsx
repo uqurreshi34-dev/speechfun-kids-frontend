@@ -12,7 +12,7 @@ interface StarsContextType {
     authToken: string | null;
     completedChallenges: Set<number>;
     refreshStars: () => Promise<void>;
-    addStar: (challengeId: number, challengeType?: 'letter' | 'yes_no') => Promise<boolean>;
+    addStar: (challengeId: number, challengeType?: 'letter' | 'yes_no' | 'functional') => Promise<boolean>;
     loading: boolean;
 }
 
@@ -93,7 +93,7 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         }
     }, [authToken, refreshStars]);
 
-    const addStar = async (challengeId: number, challengeType: 'letter' | 'yes_no' = 'letter'): Promise<boolean> => {
+    const addStar = async (challengeId: number, challengeType: 'letter' | 'yes_no' | 'functional' = 'letter'): Promise<boolean> => {
         if (completedChallenges.has(challengeId)) return true;
 
         // Optimistic update
