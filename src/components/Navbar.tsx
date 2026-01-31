@@ -1,4 +1,4 @@
-// components/Navbar.tsx
+//components/Navbar.tsx
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
