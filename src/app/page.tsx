@@ -9,7 +9,7 @@ import axios from "axios";
 import Link from "next/link";
 import SpeechButton from "@/components/SpeechButton";
 import confetti from "canvas-confetti";
-import { useStars } from "@/contexts/StarsContext";  // ← NEW IMPORT
+import { useStars } from "@/contexts/StarsContext";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -39,7 +39,7 @@ interface Challenge {
 export default function Home() {
   const { data: session, status } = useSession();
 
-  // ── NEW: Use global StarsContext instead of local state
+  // ✨ CHANGED: Only use stars context if session exists
   const { stars: totalStars, completedChallenges, addStar, loading: starsLoading } = useStars();
 
   const [letters, setLetters] = useState<Letter[]>([]);
@@ -52,9 +52,6 @@ export default function Home() {
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   const [aiExplanation, setAiExplanation] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
-
-  // Removed: local completedChallenges, totalStars, progressLoaded states
-  // Removed: the entire progress loading useEffect (now handled in StarsProvider)
 
   useEffect(() => {
     axios
@@ -127,7 +124,6 @@ export default function Home() {
     }
   };
 
-  // Confetti function (unchanged)
   const fireConfetti = () => {
     confetti({
       particleCount: 100,
@@ -137,16 +133,14 @@ export default function Home() {
   };
 
   const handleSpeechResult = async (isCorrect: boolean, transcript: string, challengeId: number) => {
-    // Changed: Use context's completedChallenges Set
     if (completedChallenges.has(challengeId)) {
       alert(isCorrect ? `✅ Already completed!` : `❌ Try again!`);
       return;
     }
 
     if (isCorrect) {
-      // Changed: Use global addStar() — now async and saves to backend
       try {
-        await addStar(challengeId, 'letter');   // ← this persists + updates Navbar instantly
+        await addStar(challengeId, 'letter');
         fireConfetti();
         alert(`🎉 Perfect! You said "${transcript}". Star earned! ⭐`);
       } catch (err) {
@@ -157,9 +151,6 @@ export default function Home() {
       alert(`❌ Not quite! You said "${transcript}" Try again!`);
     }
   };
-
-  // Removed: handleEarnStar function entirely
-  //   → logic moved into StarsContext.addStar()
 
   const playAudio = (audioPath: string | null) => {
     if (!audioPath) return;
@@ -195,7 +186,52 @@ export default function Home() {
     }
   };
 
-  if (status === "loading" || starsLoading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  // ✨ FIXED: Only show loading if status is loading AND we're not sure about auth yet
+
+  if (status === "loading") {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  // ✨ If not authenticated, show landing page
+  if (!session) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-2xl">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-6">
+            SpeechFun Kids 🎤✨
+          </h1>
+
+          <p className="text-xl sm:text-2xl mb-12 text-purple-700 font-semibold">
+            Ready for fun speech games?
+          </p>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mb-8">
+            <Link
+              href="/login"
+              className="bg-gradient-to-r from-green-400 to-teal-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="bg-gradient-to-r from-pink-400 to-purple-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-lg hover:scale-105 transition"
+            >
+              Register
+            </Link>
+          </div>
+
+          <p className="text-base sm:text-lg text-gray-600">
+            or login with Google for quick start!
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  // ✨ FIXED: Only wait for starsLoading if user is authenticated
+  if (session && starsLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading your progress...</div>;
+  }
 
   return (
     <>
@@ -209,13 +245,11 @@ export default function Home() {
                 </p>
                 <p className="text-lg text-yellow-600 font-bold mt-1 flex items-center gap-2">
                   <Star size={20} fill="gold" className="text-yellow-500" />
-                  Stars: {totalStars}   {/* ← now from context */}
-                  {starsLoading && <span className="text-sm text-gray-500">(syncing...)</span>}
+                  Stars: {totalStars}
                 </p>
               </div>
             </div>
 
-            {/* Rest of your UI remains completely unchanged ↓ */}
             {selectedLetter && (
               <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center">
                 <div className="inline-flex items-center gap-3 bg-white/90 p-3 rounded-xl shadow-lg border-2 border-purple-300">
@@ -291,18 +325,7 @@ export default function Home() {
                                 {challenge.word?.audio && (
                                   <button
                                     onClick={() => playAudio(challenge.word.audio)}
-                                    className={`
-                                    flex items-center justify-center gap-2
-                                    bg-blue-400 hover:bg-blue-500
-                                    text-white
-                                    px-5 sm:px-6 py-3                   
-                                    rounded-xl                           
-                                    shadow-lg                            
-                                    transition hover:scale-105
-                                    font-bold                           
-                                    min-w-[140px]                       
-                                    w-auto
-                                  `}
+                                    className="flex items-center justify-center gap-2 bg-blue-400 hover:bg-blue-500 text-white px-5 sm:px-6 py-3 rounded-xl shadow-lg transition hover:scale-105 font-bold min-w-[140px] w-auto"
                                     title="Listen to example"
                                   >
                                     <Volume2 size={20} />
@@ -365,7 +388,6 @@ export default function Home() {
                                 </button>
                               )}
 
-                              {/* AI Helper Button */}
                               <button
                                 onClick={() => {
                                   setSelectedWord(word);
@@ -413,7 +435,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* AI Helper Modal – unchanged */}
+      {/* AI Helper Modal */}
       {aiHelperOpen && selectedWord && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -429,7 +451,6 @@ export default function Home() {
               boxShadow: '0 0 40px rgba(167, 139, 250, 0.6), 0 0 80px rgba(236, 72, 153, 0.4)'
             }}
           >
-            {/* Floating Stars */}
             <div className="absolute -top-4 -left-4 text-4xl animate-bounce">⭐</div>
             <div className="absolute -top-4 -right-4 text-3xl animate-bounce" style={{ animationDelay: '0.2s' }}>✨</div>
             <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce" style={{ animationDelay: '0.4s' }}>🌟</div>
