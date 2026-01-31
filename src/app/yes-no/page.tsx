@@ -45,73 +45,73 @@ export default function YesNoLab() {
 
     // For mobile swiping
     // Swipe logic - attach to PARENT container (never re-mounts)
-    const swipeContainerRef = useRef<HTMLDivElement>(null);
-    const touchStartX = useRef<number>(0);
-    const touchStartY = useRef<number>(0);
+    // const swipeContainerRef = useRef<HTMLDivElement>(null);
+    // const touchStartX = useRef<number>(0);
+    // const touchStartY = useRef<number>(0);
 
-    useEffect(() => {
-        const container = swipeContainerRef.current;
-        if (!container) return;
+    // useEffect(() => {
+    //     const container = swipeContainerRef.current;
+    //     if (!container) return;
 
-        let touchMoved = false;
+    //     let touchMoved = false;
 
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartX.current = e.touches[0].clientX;
-            touchStartY.current = e.touches[0].clientY;
-            touchMoved = false;
-        };
+    //     const handleTouchStart = (e: TouchEvent) => {
+    //         touchStartX.current = e.touches[0].clientX;
+    //         touchStartY.current = e.touches[0].clientY;
+    //         touchMoved = false;
+    //     };
 
-        const handleTouchMove = (e: TouchEvent) => {
-            if (!touchStartX.current) return;
+    //     const handleTouchMove = (e: TouchEvent) => {
+    //         if (!touchStartX.current) return;
 
-            const deltaX = e.touches[0].clientX - touchStartX.current;
-            const deltaY = e.touches[0].clientY - touchStartY.current;
+    //         const deltaX = e.touches[0].clientX - touchStartX.current;
+    //         const deltaY = e.touches[0].clientY - touchStartY.current;
 
-            // If mostly horizontal → prevent page scroll
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 20) {
-                e.preventDefault(); // Blocks horizontal page scroll
-                touchMoved = true;
-            }
-        };
+    //         // If mostly horizontal → prevent page scroll
+    //         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 20) {
+    //             e.preventDefault(); // Blocks horizontal page scroll
+    //             touchMoved = true;
+    //         }
+    //     };
 
-        const handleTouchEnd = (e: TouchEvent) => {
-            if (!touchStartX.current || !touchMoved) return;
+    //     const handleTouchEnd = (e: TouchEvent) => {
+    //         if (!touchStartX.current || !touchMoved) return;
 
-            const diffX = touchStartX.current - e.changedTouches[0].clientX;
-            const SWIPE_THRESHOLD = 60; // pixels
+    //         const diffX = touchStartX.current - e.changedTouches[0].clientX;
+    //         const SWIPE_THRESHOLD = 60; // pixels
 
-            if (Math.abs(diffX) > SWIPE_THRESHOLD) {
-                if (diffX > 0) {
-                    // Swipe left → next
-                    if (currentIndex < questions.length - 1) {
-                        setCurrentIndex(prev => prev + 1);
-                        setFeedback(null);
-                        setJustCompleted(false);
-                    }
-                } else {
-                    // Swipe right → previous
-                    if (currentIndex > 0) {
-                        setCurrentIndex(prev => prev - 1);
-                        setFeedback(null);
-                        setJustCompleted(false);
-                    }
-                }
-            }
+    //         if (Math.abs(diffX) > SWIPE_THRESHOLD) {
+    //             if (diffX > 0) {
+    //                 // Swipe left → next
+    //                 if (currentIndex < questions.length - 1) {
+    //                     setCurrentIndex(prev => prev + 1);
+    //                     setFeedback(null);
+    //                     setJustCompleted(false);
+    //                 }
+    //             } else {
+    //                 // Swipe right → previous
+    //                 if (currentIndex > 0) {
+    //                     setCurrentIndex(prev => prev - 1);
+    //                     setFeedback(null);
+    //                     setJustCompleted(false);
+    //                 }
+    //             }
+    //         }
 
-            touchStartX.current = 0;
-            touchStartY.current = 0;
-        };
+    //         touchStartX.current = 0;
+    //         touchStartY.current = 0;
+    //     };
 
-        container.addEventListener("touchstart", handleTouchStart, { passive: true });
-        container.addEventListener("touchmove", handleTouchMove, { passive: false }); // Allows preventDefault
-        container.addEventListener("touchend", handleTouchEnd, { passive: true });
+    //     container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    //     container.addEventListener("touchmove", handleTouchMove, { passive: false }); // Allows preventDefault
+    //     container.addEventListener("touchend", handleTouchEnd, { passive: true });
 
-        return () => {
-            container.removeEventListener("touchstart", handleTouchStart);
-            container.removeEventListener("touchmove", handleTouchMove);
-            container.removeEventListener("touchend", handleTouchEnd);
-        };
-    }, [currentIndex, questions.length]); // deps for fresh index/length
+    //     return () => {
+    //         container.removeEventListener("touchstart", handleTouchStart);
+    //         container.removeEventListener("touchmove", handleTouchMove);
+    //         container.removeEventListener("touchend", handleTouchEnd);
+    //     };
+    // }, [currentIndex, questions.length]); // deps for fresh index/length
 
     // Save current index to sessionStorage with user-specific key
     useEffect(() => {
@@ -226,10 +226,10 @@ export default function YesNoLab() {
     const question = questions[currentIndex];
     const isCompleted = completedChallenges.has(question.id);
     const wasAlreadyCompleted = isCompleted && !justCompleted;
-
+    //ref={swipeContainerRef} add after mx-auto
     return (
         <main className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 py-6 sm:py-10 px-4"> {/* ← Increased top/bottom padding for breathing room */}
-            <div className="max-w-4xl mx-auto" ref={swipeContainerRef}>
+            <div className="max-w-4xl mx-auto">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-center text-purple-700 mb-6 sm:mb-10">
                     Yes / No Lab 🧐
                 </h1>
