@@ -43,50 +43,72 @@ export default function YesNoLab() {
     const { stars, completedChallenges, addStar, loading: starsLoading } = useStars();
 
 
-    //For mobile swiping
-    // ✨ NEW: Ref for the swipeable card container
+    // For mobile swiping
     const cardRef = useRef<HTMLDivElement>(null);
-    // ✨ NEW: Track touch start position
     const touchStartX = useRef<number>(0);
+    const touchStartY = useRef<number>(0);
 
-    // ✨ NEW: Swipe handler useEffect — attaches to the card
     useEffect(() => {
         const card = cardRef.current;
         if (!card) return;
 
+        let touchMoved = false;
+
         const handleTouchStart = (e: TouchEvent) => {
             touchStartX.current = e.touches[0].clientX;
+            touchStartY.current = e.touches[0].clientY;
+            touchMoved = false;
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (!touchStartX.current) return;
+
+            const deltaX = e.touches[0].clientX - touchStartX.current;
+            const deltaY = e.touches[0].clientY - touchStartY.current;
+
+            // If horizontal movement is dominant → prevent page scroll
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+                e.preventDefault(); // ← Blocks page horizontal scroll
+                touchMoved = true;
+            }
         };
 
         const handleTouchEnd = (e: TouchEvent) => {
-            const diff = touchStartX.current - e.changedTouches[0].clientX;
-            const SWIPE_THRESHOLD = 50; // minimum pixels to count as a swipe
+            if (!touchStartX.current || !touchMoved) return;
 
-            if (diff > SWIPE_THRESHOLD) {
-                // Swiped left → next
+            const diffX = touchStartX.current - e.changedTouches[0].clientX;
+            const SWIPE_THRESHOLD = 60; // pixels (increased for reliability)
+
+            if (diffX > SWIPE_THRESHOLD) {
+                // Swipe left → next
                 if (currentIndex < questions.length - 1) {
                     setCurrentIndex(prev => prev + 1);
                     setFeedback(null);
                     setJustCompleted(false);
                 }
-            } else if (diff < -SWIPE_THRESHOLD) {
-                // Swiped right → previous
+            } else if (diffX < -SWIPE_THRESHOLD) {
+                // Swipe right → previous
                 if (currentIndex > 0) {
                     setCurrentIndex(prev => prev - 1);
                     setFeedback(null);
                     setJustCompleted(false);
                 }
             }
+
+            touchStartX.current = 0;
+            touchStartY.current = 0;
         };
 
         card.addEventListener("touchstart", handleTouchStart, { passive: true });
+        card.addEventListener("touchmove", handleTouchMove, { passive: false }); // ← passive false allows preventDefault
         card.addEventListener("touchend", handleTouchEnd, { passive: true });
 
         return () => {
             card.removeEventListener("touchstart", handleTouchStart);
+            card.removeEventListener("touchmove", handleTouchMove);
             card.removeEventListener("touchend", handleTouchEnd);
         };
-    }, [currentIndex, questions.length]); // ✨ deps so it always has fresh currentIndex
+    }, [currentIndex, questions.length]); // deps for fresh index/length
 
     // Save current index to sessionStorage with user-specific key
     useEffect(() => {
