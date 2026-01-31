@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { CheckCircle, XCircle, ChevronLeft, ChevronRight, Star } from "lucide-react";
@@ -41,6 +41,52 @@ export default function YesNoLab() {
     const [authToken, setAuthToken] = useState<string | null>(null);
 
     const { stars, completedChallenges, addStar, loading: starsLoading } = useStars();
+
+
+    //For mobile swiping
+    // ✨ NEW: Ref for the swipeable card container
+    const cardRef = useRef<HTMLDivElement>(null);
+    // ✨ NEW: Track touch start position
+    const touchStartX = useRef<number>(0);
+
+    // ✨ NEW: Swipe handler useEffect — attaches to the card
+    useEffect(() => {
+        const card = cardRef.current;
+        if (!card) return;
+
+        const handleTouchStart = (e: TouchEvent) => {
+            touchStartX.current = e.touches[0].clientX;
+        };
+
+        const handleTouchEnd = (e: TouchEvent) => {
+            const diff = touchStartX.current - e.changedTouches[0].clientX;
+            const SWIPE_THRESHOLD = 50; // minimum pixels to count as a swipe
+
+            if (diff > SWIPE_THRESHOLD) {
+                // Swiped left → next
+                if (currentIndex < questions.length - 1) {
+                    setCurrentIndex(prev => prev + 1);
+                    setFeedback(null);
+                    setJustCompleted(false);
+                }
+            } else if (diff < -SWIPE_THRESHOLD) {
+                // Swiped right → previous
+                if (currentIndex > 0) {
+                    setCurrentIndex(prev => prev - 1);
+                    setFeedback(null);
+                    setJustCompleted(false);
+                }
+            }
+        };
+
+        card.addEventListener("touchstart", handleTouchStart, { passive: true });
+        card.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+        return () => {
+            card.removeEventListener("touchstart", handleTouchStart);
+            card.removeEventListener("touchend", handleTouchEnd);
+        };
+    }, [currentIndex, questions.length]); // ✨ deps so it always has fresh currentIndex
 
     // Save current index to sessionStorage with user-specific key
     useEffect(() => {
@@ -170,7 +216,8 @@ export default function YesNoLab() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -50 }}
                         transition={{ duration: 0.4 }}
-                        className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-4 border-purple-200"
+                        className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-4 border-purple-200 touch-pan-y" // ✨ ADDED: touch-pan-y allows vertical scroll but captures horizontal swipes
+                        ref={cardRef} // ✨ NEW: Attach ref to the card for swipe detection
                     >
                         {/* Progress indicator */}
                         <div className="text-center mb-4 sm:mb-6">
