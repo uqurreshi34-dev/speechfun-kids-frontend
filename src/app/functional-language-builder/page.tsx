@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { ArrowRight, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Volume2, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import axios from "axios";
 import confetti from "canvas-confetti";
 import { useStars } from "@/contexts/StarsContext";
