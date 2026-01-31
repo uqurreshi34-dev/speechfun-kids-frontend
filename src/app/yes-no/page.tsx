@@ -30,6 +30,7 @@ export default function YesNoLab() {
         return 0;
     });
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
+    const [justCompleted, setJustCompleted] = useState(false); // Track if just completed this session
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { data: session, status } = useSession();
@@ -92,17 +93,20 @@ export default function YesNoLab() {
         const question = questions[currentIndex];
         const isCorrect = answer.toLowerCase() === question.correct_answer.toLowerCase();
 
-        // Don't re-award stars for already completed challenges
-        if (completedChallenges.has(question.id)) {
-            // Just show feedback without awarding
+        // Check if this was already completed BEFORE this session
+        const wasAlreadyCompleted = completedChallenges.has(question.id) && !justCompleted;
+
+        if (wasAlreadyCompleted) {
+            // User clicked on an already completed challenge
             setFeedback(isCorrect ? "correct" : "incorrect");
             return;
         }
 
         setFeedback(isCorrect ? "correct" : "incorrect");
 
-        if (isCorrect) {
+        if (isCorrect && !completedChallenges.has(question.id)) {
             confetti();
+            setJustCompleted(true); // Mark as just completed in this session
 
             try {
                 await addStar(question.id, 'yes_no');
@@ -117,6 +121,7 @@ export default function YesNoLab() {
         if (currentIndex < questions.length - 1) {
             setCurrentIndex(currentIndex + 1);
             setFeedback(null);
+            setJustCompleted(false); // Reset when navigating
         }
     };
 
@@ -124,6 +129,7 @@ export default function YesNoLab() {
         if (currentIndex > 0) {
             setCurrentIndex(currentIndex - 1);
             setFeedback(null);
+            setJustCompleted(false); // Reset when navigating
         }
     };
 
@@ -141,6 +147,7 @@ export default function YesNoLab() {
 
     const question = questions[currentIndex];
     const isCompleted = completedChallenges.has(question.id);
+    const wasAlreadyCompleted = isCompleted && !justCompleted;
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 py-8 px-4">
@@ -213,8 +220,8 @@ export default function YesNoLab() {
                                 className={`text-center text-2xl font-black mb-8 ${feedback === "correct" ? "text-green-600" : "text-red-600"
                                     }`}
                             >
-                                {feedback === "correct" && !isCompleted && "🎉 Yes! Great job! +1 ⭐"}
-                                {feedback === "correct" && isCompleted && "🎉 Correct! (Already completed)"}
+                                {feedback === "correct" && !wasAlreadyCompleted && "🎉 Yes! Great job! +1 ⭐"}
+                                {feedback === "correct" && wasAlreadyCompleted && "🎉 Correct! (Already completed)"}
                                 {feedback === "incorrect" && "Not quite... try again!"}
                             </motion.div>
                         )}
