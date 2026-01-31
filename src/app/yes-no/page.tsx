@@ -67,7 +67,9 @@ export default function YesNoLab() {
 
         const fetchQuestions = async () => {
             try {
-                const res = await axios.get(`${backendUrl}/api/challenges/yes-no-questions/`); // adjust endpoint if needed
+                const res = await axios.get(`${backendUrl}/api/challenges/yes-no-questions/`, {
+                    headers: { Authorization: `Token ${authToken}` }
+                });
                 setQuestions(res.data);
                 setLoading(false);
             } catch (err) {
