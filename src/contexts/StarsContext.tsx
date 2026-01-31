@@ -1,7 +1,7 @@
 // contexts/StarsContext.tsx (drop-in)
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
 
@@ -12,7 +12,7 @@ interface StarsContextType {
     authToken: string | null;
     completedChallenges: Set<number>;
     refreshStars: () => Promise<void>;
-    addStar: (challengeId: number, challengeType?: 'letter' | 'yes_no') => Promise<boolean>; // returns success
+    addStar: (challengeId: number, challengeType?: 'letter' | 'yes_no') => Promise<boolean>;
     loading: boolean;
 }
 
@@ -25,7 +25,10 @@ export function StarsProvider({ children }: { children: ReactNode }) {
     const [completedChallenges, setCompletedChallenges] = useState<Set<number>>(new Set());
     const [loading, setLoading] = useState(true);
 
-    // Get auth token (your original)
+    // ✨ NEW: Track if we've already loaded to prevent redundant refreshes
+    const hasLoadedRef = useRef(false);
+
+    // Get auth token (unchanged)
     useEffect(() => {
         if (!session?.user?.email) return;
 
@@ -59,6 +62,7 @@ export function StarsProvider({ children }: { children: ReactNode }) {
             const completed = new Set<number>(res.data.map((p: { challenge: number }) => p.challenge));
             setCompletedChallenges(completed);
             setStars(completed.size);
+            hasLoadedRef.current = true; // ✨ NEW: Mark as loaded
         } catch (err) {
             console.error("Failed to load stars", err);
         } finally {
@@ -66,17 +70,17 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         }
     }, [authToken]);
 
+    // ✨ CHANGED: Only refresh on initial load, not on every authToken change
     useEffect(() => {
-        if (authToken) {
+        if (authToken && !hasLoadedRef.current) {
             refreshStars();
         }
     }, [authToken, refreshStars]);
 
-    // Updated addStar – now sends challenge_type
     const addStar = async (challengeId: number, challengeType: 'letter' | 'yes_no' = 'letter'): Promise<boolean> => {
         if (completedChallenges.has(challengeId)) return true;
 
-        // Optimistic update (kept for smooth UI)
+        // Optimistic update
         setCompletedChallenges(prev => {
             const newSet = new Set(prev);
             newSet.add(challengeId);
@@ -89,15 +93,16 @@ export function StarsProvider({ children }: { children: ReactNode }) {
                 `${backendUrl}/api/challenges/progress/update/`,
                 {
                     challenge: challengeId,
-                    challenge_type: challengeType,  // ← This is the key line added!
+                    challenge_type: challengeType,
                     completed: true,
                     score: 100
                 },
                 { headers: { Authorization: `Token ${authToken}`, "Content-Type": "application/json" } }
             );
 
-            // Sync from backend
-            await refreshStars();
+            // ✨ REMOVED: The refreshStars() call here was causing the reload!
+            // The optimistic update above is sufficient for UI responsiveness
+            // If you need to sync from backend occasionally, do it on page navigation instead
 
             return true;
         } catch (err) {
