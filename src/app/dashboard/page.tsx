@@ -8,6 +8,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { Trophy, Target, TrendingUp, Star } from "lucide-react";
 
+
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 interface ProgressItem {

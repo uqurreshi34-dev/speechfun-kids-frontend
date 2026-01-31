@@ -1,4 +1,4 @@
-// contexts/StarsContext.tsx
+// contexts/StarsContext.tsx (drop-in)
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
@@ -12,7 +12,7 @@ interface StarsContextType {
     authToken: string | null;
     completedChallenges: Set<number>;
     refreshStars: () => Promise<void>;
-    addStar: (challengeId: number) => void;
+    addStar: (challengeId: number) => Promise<boolean>; // returns success
     loading: boolean;
 }
 
@@ -23,9 +23,9 @@ export function StarsProvider({ children }: { children: ReactNode }) {
     const [authToken, setAuthToken] = useState<string | null>(null);
     const [stars, setStars] = useState(0);
     const [completedChallenges, setCompletedChallenges] = useState<Set<number>>(new Set());
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    // Get auth token
+    // Get auth token (your original)
     useEffect(() => {
         if (!session?.user?.email) return;
 
@@ -47,7 +47,6 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         getAuthToken();
     }, [session]);
 
-    // Stable refresh function with useCallback
     const refreshStars = useCallback(async () => {
         if (!authToken) return;
 
@@ -65,25 +64,48 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         } finally {
             setLoading(false);
         }
-    }, [authToken]); // ← authToken is the only dep
+    }, [authToken]);
 
-    // Load stars initially when token is ready
     useEffect(() => {
         if (authToken) {
             refreshStars();
         }
-    }, [authToken, refreshStars]); // ← now includes refreshStars (stable)
+    }, [authToken, refreshStars]);
 
-    // Add a star (optimistic update)
-    const addStar = (challengeId: number) => {
-        setCompletedChallenges((prev) => {
+    // Updated addStar with POST + refresh
+    const addStar = async (challengeId: number): Promise<boolean> => {
+        if (completedChallenges.has(challengeId)) return true;
+
+        // Optimistic
+        setCompletedChallenges(prev => {
             const newSet = new Set(prev);
-            if (!newSet.has(challengeId)) {
-                newSet.add(challengeId);
-                setStars(newSet.size);
-            }
+            newSet.add(challengeId);
+            setStars(newSet.size);
             return newSet;
         });
+
+        try {
+            await axios.post(
+                `${backendUrl}/api/challenges/progress/update/`,
+                { challenge: challengeId, completed: true, score: 100 },
+                { headers: { Authorization: `Token ${authToken}`, "Content-Type": "application/json" } }
+            );
+
+            // Sync from backend
+            await refreshStars();
+
+            return true;
+        } catch (err) {
+            console.error("Failed to save star", err);
+            // Rollback
+            setCompletedChallenges(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(challengeId);
+                setStars(newSet.size);
+                return newSet;
+            });
+            return false;
+        }
     };
 
     return (
