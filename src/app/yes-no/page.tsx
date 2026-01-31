@@ -157,9 +157,9 @@ export default function YesNoLab() {
     const wasAlreadyCompleted = isCompleted && !justCompleted;
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 py-4 sm:py-8 px-4">
+        <main className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 py-6 sm:py-10 px-4"> {/* ← Increased top/bottom padding for breathing room */}
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-center text-purple-700 mb-4 sm:mb-8">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-center text-purple-700 mb-6 sm:mb-10">
                     Yes / No Lab 🧐
                 </h1>
 
@@ -170,11 +170,11 @@ export default function YesNoLab() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -50 }}
                         transition={{ duration: 0.4 }}
-                        className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-6 md:p-10 border-4 border-purple-200"
+                        className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-4 border-purple-200"
                     >
                         {/* Progress indicator */}
-                        <div className="text-center mb-4">
-                            <p className="text-lg sm:text-xl font-bold text-purple-600">
+                        <div className="text-center mb-4 sm:mb-6">
+                            <p className="text-base sm:text-lg font-bold text-purple-600">
                                 Question {currentIndex + 1} of {questions.length}
                             </p>
                             <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mt-2">
@@ -186,14 +186,14 @@ export default function YesNoLab() {
                         </div>
 
                         {/* Stars display */}
-                        <div className="flex justify-center items-center gap-2 mb-4">
+                        <div className="flex justify-center items-center gap-2 mb-4 sm:mb-6">
                             <Star size={24} className="text-yellow-500 fill-yellow-500 animate-pulse sm:w-8 sm:h-8" />
                             <span className="text-2xl sm:text-3xl font-black text-purple-700">{stars}</span>
                         </div>
 
-                        {/* Completion Badge - Shows if already completed */}
+                        {/* Completion Badge */}
                         {isCompleted && (
-                            <div className="flex justify-center mb-4">
+                            <div className="flex justify-center mb-4 sm:mb-6">
                                 <div className="bg-green-100 border-2 border-green-400 text-green-700 px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold text-sm sm:text-lg flex items-center gap-2">
                                     <Star size={20} className="fill-yellow-400 text-yellow-400 sm:w-6 sm:h-6" />
                                     Challenge Completed!
@@ -201,9 +201,9 @@ export default function YesNoLab() {
                             </div>
                         )}
 
-                        {/* Visual - Reduced size for better fit */}
+                        {/* Visual - SHORTER & CONTAIN */}
                         {question.visual_url && (
-                            <div className="relative w-full h-48 sm:h-56 md:h-64 mb-4 sm:mb-6 rounded-2xl overflow-hidden shadow-lg border-4 border-white bg-white">
+                            <div className="relative w-full h-40 sm:h-56 md:h-72 mb-4 sm:mb-6 rounded-2xl overflow-hidden shadow-lg border-4 border-white bg-white"> {/* ← Shorter heights */}
                                 <Image
                                     src={question.visual_url.startsWith("http") ? question.visual_url : `${backendUrl}${question.visual_url}`}
                                     alt={question.scene_description}
@@ -215,8 +215,8 @@ export default function YesNoLab() {
                             </div>
                         )}
 
-                        {/* Question */}
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6 sm:mb-8 leading-relaxed">
+                        {/* Question - Smaller text */}
+                        <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4 sm:mb-6 leading-relaxed">
                             {question.question}
                         </h2>
 
@@ -225,8 +225,7 @@ export default function YesNoLab() {
                             <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className={`text-center text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-red-600"
-                                    }`}
+                                className={`text-center text-base sm:text-lg md:text-xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-red-600"}`}
                             >
                                 {feedback === "correct" && !wasAlreadyCompleted && "🎉 Yes! Great job! +1 ⭐"}
                                 {feedback === "correct" && wasAlreadyCompleted && "🎉 Correct! (Already completed)"}
@@ -234,13 +233,13 @@ export default function YesNoLab() {
                             </motion.div>
                         )}
 
-                        {/* Answer Buttons - Reduced padding */}
+                        {/* Answer Buttons - Smaller padding */}
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
                             <motion.button
                                 whileHover={{ scale: 1.08 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleAnswer("Yes")}
-                                className="flex-1 bg-gradient-to-br from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-black text-xl sm:text-2xl md:text-3xl py-4 sm:py-6 rounded-3xl shadow-xl transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
+                                className="flex-1 bg-gradient-to-br from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-black text-lg sm:text-2xl md:text-3xl py-3 sm:py-5 rounded-3xl shadow-xl transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
                             >
                                 <CheckCircle size={32} className="sm:w-10 sm:h-10" />
                                 YES
@@ -250,7 +249,7 @@ export default function YesNoLab() {
                                 whileHover={{ scale: 1.08 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleAnswer("No")}
-                                className="flex-1 bg-gradient-to-br from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white font-black text-xl sm:text-2xl md:text-3xl py-4 sm:py-6 rounded-3xl shadow-xl transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
+                                className="flex-1 bg-gradient-to-br from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white font-black text-lg sm:text-2xl md:text-3xl py-3 sm:py-5 rounded-3xl shadow-xl transition-all duration-300 flex items-center justify-center gap-3 border-4 border-white"
                             >
                                 <XCircle size={32} className="sm:w-10 sm:h-10" />
                                 NO
@@ -258,7 +257,7 @@ export default function YesNoLab() {
                         </div>
 
                         {/* Navigation Arrows */}
-                        <div className="flex justify-between items-center pt-4 sm:pt-6">
+                        <div className="flex justify-between items-center pt-3 sm:pt-5"> {/* ← Reduced pt */}
                             <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
