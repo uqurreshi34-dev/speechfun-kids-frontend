@@ -32,7 +32,8 @@ export default function FunctionalLanguage() {
         return 0;
     });
 
-    const [feedback, setFeedback] = useState<"correct" | null>(null);
+    const [feedback, setFeedback] = useState<"correct" | "already_done" | null>(null); // ← Added "already_done"
+    const [justCompleted, setJustCompleted] = useState(false); // ← NEW: tracks if this completion was just now
     const [loading, setLoading] = useState(true);
     const [authToken, setAuthToken] = useState<string | null>(null);
 
@@ -90,16 +91,37 @@ export default function FunctionalLanguage() {
 
     const current = phrases[currentIndex];
     const isCompleted = completedChallenges.has(current?.id);
+    const wasAlreadyCompleted = isCompleted && !justCompleted;
 
     const handleComplete = async () => {
+        if (wasAlreadyCompleted) {
+            setFeedback("already_done");
+            setTimeout(() => setFeedback(null), 1800);
+            return;
+        }
+
         setFeedback("correct");
+
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
 
         try {
             await addStar(current.id, 'functional');
+            setJustCompleted(true); // ← Mark as newly completed
         } catch (err) {
             console.error("Failed to award star", err);
             alert("Failed to save progress. Please try again.");
+        }
+    };
+
+    const speakPhrase = () => {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(current.phrase);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            speechSynthesis.speak(utterance);
+        } else {
+            alert("Speech synthesis not supported in this browser.");
         }
     };
 
@@ -107,6 +129,7 @@ export default function FunctionalLanguage() {
         if (currentIndex < phrases.length - 1) {
             setCurrentIndex(prev => prev + 1);
             setFeedback(null);
+            setJustCompleted(false);
         }
     };
 
@@ -114,6 +137,7 @@ export default function FunctionalLanguage() {
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1);
             setFeedback(null);
+            setJustCompleted(false);
         }
     };
 
@@ -153,7 +177,7 @@ export default function FunctionalLanguage() {
                             </div>
                         )}
 
-                        {/* Visual - smaller */}
+                        {/* Visual */}
                         {current.visual_url && (
                             <div className="relative w-full h-40 sm:h-56 md:h-72 mb-4 sm:mb-6 rounded-2xl overflow-hidden shadow-lg border-4 border-white bg-white">
                                 <Image
@@ -172,7 +196,20 @@ export default function FunctionalLanguage() {
                             {current.phrase}
                         </h2>
 
-                        {/* Complete Button - always enabled */}
+                        {/* Hear It! Button */}
+                        <div className="flex justify-center mb-4 sm:mb-6">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={speakPhrase}
+                                className="bg-gradient-to-r from-blue-400 to-cyan-500 hover:from-blue-500 hover:to-cyan-600 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-2xl shadow-md transition flex items-center gap-2"
+                            >
+                                <Volume2 size={24} />
+                                Hear It!
+                            </motion.button>
+                        </div>
+
+                        {/* Complete Button */}
                         <div className="flex justify-center mb-6 sm:mb-8">
                             <motion.button
                                 whileHover={{ scale: 1.1 }}
@@ -183,6 +220,18 @@ export default function FunctionalLanguage() {
                                 I said it! ⭐
                             </motion.button>
                         </div>
+
+                        {/* Feedback */}
+                        {feedback && (
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className={`text-center text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-blue-600"}`}
+                            >
+                                {feedback === "correct" && !wasAlreadyCompleted && "🎉 Great job! +1 ⭐"}
+                                {feedback === "already_done" && "Already completed! 🌟"}
+                            </motion.div>
+                        )}
 
                         {/* Navigation Arrows */}
                         <div className="flex justify-between items-center pt-4 sm:pt-6">
