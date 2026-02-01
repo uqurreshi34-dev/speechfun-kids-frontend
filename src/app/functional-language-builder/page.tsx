@@ -167,15 +167,7 @@ export default function FunctionalLanguage() {
                             <span className="text-2xl sm:text-3xl font-black text-purple-700">{stars}</span>
                         </div>
 
-                        {/* Completion Badge */}
-                        {isCompleted && (
-                            <div className="flex justify-center mb-4 sm:mb-6">
-                                <div className="bg-green-100 border-2 border-green-400 text-green-700 px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold text-sm sm:text-lg flex items-center gap-2">
-                                    <Star size={20} className="fill-yellow-400 text-yellow-400 sm:w-6 sm:h-6" />
-                                    Already Completed!
-                                </div>
-                            </div>
-                        )}
+                        {/* REMOVED: No more top "Already Completed!" badge */}
 
                         {/* Visual */}
                         {current.visual_url && (
@@ -197,7 +189,7 @@ export default function FunctionalLanguage() {
                         </h2>
 
                         {/* Hear It! Button */}
-                        <div className="flex justify-center mb-4 sm:mb-6">
+                        <div className="flex justify-center mb-6 sm:mb-8">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -221,12 +213,13 @@ export default function FunctionalLanguage() {
                             </motion.button>
                         </div>
 
-                        {/* Feedback */}
+                        {/* Feedback - only shows on button click */}
                         {feedback && (
                             <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className={`text-center text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-blue-600"}`}
+                                className={`text-center text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-blue-600"
+                                    }`}
                             >
                                 {feedback === "correct" && !wasAlreadyCompleted && "🎉 Great job! +1 ⭐"}
                                 {feedback === "already_done" && "Already completed! 🌟"}
