@@ -34,10 +34,21 @@ export default function FunctionalLanguage() {
     const [feedback, setFeedback] = useState<"correct" | "already_done" | null>(null);
     // ✨ CHANGED: replaced justCompleted state with a Set ref that tracks IDs completed in this session
     const completedThisSession = useRef<Set<number>>(new Set());
+    // ✨ NEW: track which user the ref belongs to
+    const currentUserRef = useRef<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [authToken, setAuthToken] = useState<string | null>(null);
 
     const { stars, completedChallenges, addStar } = useStars();
+
+    // ✨ NEW: Reset completedThisSession when user changes
+    useEffect(() => {
+        const email = session?.user?.email || null;
+        if (currentUserRef.current !== email) {
+            currentUserRef.current = email;
+            completedThisSession.current = new Set();
+        }
+    }, [session?.user?.email]);
 
     useEffect(() => {
         if (session?.user?.email) {
