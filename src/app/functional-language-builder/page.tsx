@@ -91,7 +91,7 @@ export default function FunctionalLanguage() {
 
     const handleComplete = async () => {
         // ✨ CHANGED: snapshot the check at click time, not from derived render variables
-        const alreadyDone = completedChallenges.has(current.id) || !completedThisSession.current.has(current.id);
+        const alreadyDone = completedChallenges.has(current.id) || completedThisSession.current.has(current.id);
 
         if (alreadyDone) {
             setFeedback("already_done");
