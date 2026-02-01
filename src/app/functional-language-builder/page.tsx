@@ -32,8 +32,7 @@ export default function FunctionalLanguage() {
     });
 
     const [feedback, setFeedback] = useState<"correct" | "already_done" | null>(null);
-    // ✨ CHANGED: replaced justCompleted state with a Set ref that tracks IDs completed in this session
-    const completedThisSession = useRef<Set<number>>(new Set());
+
     // ✨ NEW: track which user the ref belongs to
     const currentUserRef = useRef<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -41,14 +40,6 @@ export default function FunctionalLanguage() {
 
     const { stars, completedChallenges, addStar } = useStars();
 
-    // ✨ NEW: Reset completedThisSession when user changes
-    useEffect(() => {
-        const email = session?.user?.email || null;
-        if (currentUserRef.current !== email) {
-            currentUserRef.current = email;
-            completedThisSession.current = new Set();
-        }
-    }, [session?.user?.email]);
 
     useEffect(() => {
         if (session?.user?.email) {
@@ -99,10 +90,23 @@ export default function FunctionalLanguage() {
 
     const current = phrases[currentIndex];
 
+    // ✨ CHANGED: replaced justCompleted state with a Set ref that tracks IDs completed in this session
+    const completedThisSession = useRef<Set<number>>(new Set());
+    // ✨ NEW: Reset completedThisSession when user changes
+    useEffect(() => {
+        const email = session?.user?.email || null;
+        if (currentUserRef.current !== email) {
+            currentUserRef.current = email;
+            completedThisSession.current = new Set();
+        }
+    }, [session?.user?.email]);
 
     const handleComplete = async () => {
         // ✨ CHANGED: snapshot the check at click time, not from derived render variables
-        const alreadyDone = completedChallenges.has(current.id) || completedThisSession.current.has(current.id);
+        const id = current.id;
+
+        // Check backend + this-session ref
+        const alreadyDone = completedChallenges.has(id) || completedThisSession.current.has(id);
 
         if (alreadyDone) {
             setFeedback("already_done");
@@ -110,20 +114,23 @@ export default function FunctionalLanguage() {
             return;
         }
 
+        // New completion
         setFeedback("correct");
+
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
 
-        // ✨ CHANGED: Mark in the ref BEFORE calling addStar so the optimistic update re-render doesn't flip it
-        completedThisSession.current.add(current.id);
+        // Mark as done in session ref (prevents repeat in this tab)
+        completedThisSession.current.add(id);
 
         try {
-            await addStar(current.id, 'functional');
+            await addStar(id, 'functional');
         } catch (err) {
             console.error("Failed to award star", err);
-            // ✨ Rollback the ref if it failed
-            completedThisSession.current.delete(current.id);
+            // Rollback session ref if failed
+            completedThisSession.current.delete(id);
             alert("Failed to save progress. Please try again.");
         }
+
     };
 
     const speakPhrase = () => {
