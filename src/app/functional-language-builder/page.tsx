@@ -1,7 +1,7 @@
 // app/functional/page.tsx
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Volume2, ChevronLeft, ChevronRight, Star } from "lucide-react";
@@ -32,15 +32,13 @@ export default function FunctionalLanguage() {
     });
 
     const [feedback, setFeedback] = useState<"correct" | "already_done" | null>(null);
-
-    // ✨ NEW: track which user the ref belongs to
-    const currentUserRef = useRef<string | null>(null);
+    const [justCompleted, setJustCompleted] = useState(false); // ← NEW: tracks if completion happened just now
     const [loading, setLoading] = useState(true);
     const [authToken, setAuthToken] = useState<string | null>(null);
 
     const { stars, completedChallenges, addStar } = useStars();
 
-
+    // Save currentIndex on change
     useEffect(() => {
         if (session?.user?.email) {
             const key = `functionalCurrentIndex_${session.user.email}`;
@@ -48,6 +46,7 @@ export default function FunctionalLanguage() {
         }
     }, [currentIndex, session?.user?.email]);
 
+    // Get auth token
     useEffect(() => {
         if (!session?.user?.email) return;
 
@@ -69,6 +68,7 @@ export default function FunctionalLanguage() {
         getAuthToken();
     }, [session?.user?.email, session?.user?.name]);
 
+    // Fetch phrases
     useEffect(() => {
         if (!authToken) return;
 
@@ -89,48 +89,27 @@ export default function FunctionalLanguage() {
     }, [authToken]);
 
     const current = phrases[currentIndex];
-
-    // ✨ CHANGED: replaced justCompleted state with a Set ref that tracks IDs completed in this session
-    const completedThisSession = useRef<Set<number>>(new Set());
-    // ✨ NEW: Reset completedThisSession when user changes
-    useEffect(() => {
-        const email = session?.user?.email || null;
-        if (currentUserRef.current !== email) {
-            currentUserRef.current = email;
-            completedThisSession.current = new Set();
-        }
-    }, [session?.user?.email]);
+    const isCompleted = completedChallenges.has(current?.id);
+    const wasAlreadyCompleted = isCompleted && !justCompleted; // ← NEW: exact Yes/No pattern
 
     const handleComplete = async () => {
-        // ✨ CHANGED: snapshot the check at click time, not from derived render variables
-        const id = current.id;
-
-        // Check backend + this-session ref
-        const alreadyDone = completedChallenges.has(id) || completedThisSession.current.has(id);
-
-        if (alreadyDone) {
+        if (wasAlreadyCompleted) {
             setFeedback("already_done");
             setTimeout(() => setFeedback(null), 1800);
             return;
         }
 
-        // New completion
         setFeedback("correct");
 
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
 
-        // Mark as done in session ref (prevents repeat in this tab)
-        completedThisSession.current.add(id);
-
         try {
-            await addStar(id, 'functional');
+            await addStar(current.id, 'functional');
+            setJustCompleted(true); // ← Only set after success — prevents race
         } catch (err) {
             console.error("Failed to award star", err);
-            // Rollback session ref if failed
-            completedThisSession.current.delete(id);
             alert("Failed to save progress. Please try again.");
         }
-
     };
 
     const speakPhrase = () => {
@@ -149,6 +128,7 @@ export default function FunctionalLanguage() {
         if (currentIndex < phrases.length - 1) {
             setCurrentIndex(prev => prev + 1);
             setFeedback(null);
+            setJustCompleted(false);
         }
     };
 
@@ -156,6 +136,7 @@ export default function FunctionalLanguage() {
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1);
             setFeedback(null);
+            setJustCompleted(false);
         }
     };
 
@@ -179,7 +160,7 @@ export default function FunctionalLanguage() {
                         transition={{ duration: 0.4 }}
                         className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-4 border-purple-200"
                     >
-                        {/* Star count */}
+                        {/* Star count above image */}
                         <div className="flex justify-center items-center gap-2 mb-4 sm:mb-6">
                             <Star size={24} className="text-yellow-500 fill-yellow-500 animate-pulse sm:w-8 sm:h-8" />
                             <span className="text-2xl sm:text-3xl font-black text-purple-700">{stars}</span>
@@ -234,8 +215,7 @@ export default function FunctionalLanguage() {
                             <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className={`text-center text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-blue-600"
-                                    }`}
+                                className={`text-center text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-blue-600"}`}
                             >
                                 {feedback === "correct" && "🎉 Great job! +1 ⭐"}
                                 {feedback === "already_done" && "Already completed! 🌟"}
