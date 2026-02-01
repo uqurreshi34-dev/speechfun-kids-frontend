@@ -1,7 +1,7 @@
 // app/functional/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Volume2, ChevronLeft, ChevronRight, Star } from "lucide-react";
@@ -22,7 +22,6 @@ export default function FunctionalLanguage() {
     const { data: session } = useSession();
     const [phrases, setPhrases] = useState<FunctionalPhrase[]>([]);
 
-    // Persist currentIndex per user via sessionStorage
     const [currentIndex, setCurrentIndex] = useState(() => {
         if (typeof window !== 'undefined' && session?.user?.email) {
             const key = `functionalCurrentIndex_${session.user.email}`;
@@ -32,14 +31,14 @@ export default function FunctionalLanguage() {
         return 0;
     });
 
-    const [feedback, setFeedback] = useState<"correct" | "already_done" | null>(null); // ← Added "already_done"
-    const [justCompleted, setJustCompleted] = useState(false); // ← NEW: tracks if this completion was just now
+    const [feedback, setFeedback] = useState<"correct" | "already_done" | null>(null);
+    // ✨ CHANGED: replaced justCompleted state with a Set ref that tracks IDs completed in this session
+    const completedThisSession = useRef<Set<number>>(new Set());
     const [loading, setLoading] = useState(true);
     const [authToken, setAuthToken] = useState<string | null>(null);
 
     const { stars, completedChallenges, addStar } = useStars();
 
-    // Save currentIndex on change
     useEffect(() => {
         if (session?.user?.email) {
             const key = `functionalCurrentIndex_${session.user.email}`;
@@ -47,7 +46,6 @@ export default function FunctionalLanguage() {
         }
     }, [currentIndex, session?.user?.email]);
 
-    // Get auth token
     useEffect(() => {
         if (!session?.user?.email) return;
 
@@ -69,7 +67,6 @@ export default function FunctionalLanguage() {
         getAuthToken();
     }, [session?.user?.email, session?.user?.name]);
 
-    // Fetch phrases
     useEffect(() => {
         if (!authToken) return;
 
@@ -90,25 +87,30 @@ export default function FunctionalLanguage() {
     }, [authToken]);
 
     const current = phrases[currentIndex];
-    const isCompleted = completedChallenges.has(current?.id);
-    const wasAlreadyCompleted = isCompleted && !justCompleted;
+
 
     const handleComplete = async () => {
-        if (wasAlreadyCompleted) {
+        // ✨ CHANGED: snapshot the check at click time, not from derived render variables
+        const alreadyDone = completedChallenges.has(current.id) || !completedThisSession.current.has(current.id);
+
+        if (alreadyDone) {
             setFeedback("already_done");
             setTimeout(() => setFeedback(null), 1800);
             return;
         }
 
         setFeedback("correct");
-
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+
+        // ✨ CHANGED: Mark in the ref BEFORE calling addStar so the optimistic update re-render doesn't flip it
+        completedThisSession.current.add(current.id);
 
         try {
             await addStar(current.id, 'functional');
-            setJustCompleted(true); // ← Mark as newly completed
         } catch (err) {
             console.error("Failed to award star", err);
+            // ✨ Rollback the ref if it failed
+            completedThisSession.current.delete(current.id);
             alert("Failed to save progress. Please try again.");
         }
     };
@@ -129,7 +131,6 @@ export default function FunctionalLanguage() {
         if (currentIndex < phrases.length - 1) {
             setCurrentIndex(prev => prev + 1);
             setFeedback(null);
-            setJustCompleted(false);
         }
     };
 
@@ -137,7 +138,6 @@ export default function FunctionalLanguage() {
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1);
             setFeedback(null);
-            setJustCompleted(false);
         }
     };
 
@@ -161,13 +161,11 @@ export default function FunctionalLanguage() {
                         transition={{ duration: 0.4 }}
                         className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-4 border-purple-200"
                     >
-                        {/* Star count above image */}
+                        {/* Star count */}
                         <div className="flex justify-center items-center gap-2 mb-4 sm:mb-6">
                             <Star size={24} className="text-yellow-500 fill-yellow-500 animate-pulse sm:w-8 sm:h-8" />
                             <span className="text-2xl sm:text-3xl font-black text-purple-700">{stars}</span>
                         </div>
-
-                        {/* REMOVED: No more top "Already Completed!" badge */}
 
                         {/* Visual */}
                         {current.visual_url && (
@@ -213,7 +211,7 @@ export default function FunctionalLanguage() {
                             </motion.button>
                         </div>
 
-                        {/* Feedback - only shows on button click */}
+                        {/* Feedback */}
                         {feedback && (
                             <motion.div
                                 initial={{ scale: 0 }}
@@ -221,7 +219,7 @@ export default function FunctionalLanguage() {
                                 className={`text-center text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 ${feedback === "correct" ? "text-green-600" : "text-blue-600"
                                     }`}
                             >
-                                {feedback === "correct" && !wasAlreadyCompleted && "🎉 Great job! +1 ⭐"}
+                                {feedback === "correct" && "🎉 Great job! +1 ⭐"}
                                 {feedback === "already_done" && "Already completed! 🌟"}
                             </motion.div>
                         )}
