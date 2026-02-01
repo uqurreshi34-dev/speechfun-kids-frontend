@@ -97,12 +97,12 @@ export function StarsProvider({ children }: { children: ReactNode }) {
         if (completedChallenges.has(challengeId)) return true;
 
         // Optimistic update
-        setCompletedChallenges(prev => {
-            const newSet = new Set(prev);
-            newSet.add(challengeId);
-            setStars(newSet.size);
-            return newSet;
-        });
+        // setCompletedChallenges(prev => {
+        //     const newSet = new Set(prev);
+        //     newSet.add(challengeId);
+        //     setStars(newSet.size);
+        //     return newSet;
+        // });
 
         try {
             await axios.post(
